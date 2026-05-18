@@ -4,7 +4,7 @@ import { User } from '@supabase/supabase-js';
 import { QueryClient } from '@tanstack/react-query';
 
 interface Subscription {
-  status: 'active' | 'pending_payment' | 'incomplete' | 'canceled' | 'unpaid' | null;
+  status: 'active' | 'pending_payment' | 'incomplete' | 'canceled' | 'unpaid' | 'past_due' | 'trialing' | null;
 }
 
 interface LojaInfo {
