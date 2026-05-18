@@ -14,6 +14,7 @@ import PublicCatalog from "./pages/PublicCatalog";
 import PublicVehicleDetail from "./pages/PublicVehicleDetail";
 import LoginPage from "./pages/LoginPage";
 import SubscribePage from "./pages/SubscribePage";
+import PastDuePage from "./pages/PastDuePage";
 import NotFound from "./pages/NotFound";
 import AdminMaster from "./pages/AdminMaster";
 
@@ -55,6 +56,7 @@ const App = () => (
                 <Route path="/demo" element={<DemoPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/assinar" element={<SubscribePage />} />
+                <Route path="/inadimplente" element={<PastDuePage />} />
 
                 <Route path="/loja/:lojaSlug" element={<PublicCatalog />} />
                 <Route path="/loja/:lojaSlug/veiculo/:id" element={<PublicVehicleDetail />} />

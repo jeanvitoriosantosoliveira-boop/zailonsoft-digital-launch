@@ -126,20 +126,20 @@ const HomePage = () => {
           <div className="flex items-center justify-between gap-2">
             <Link to="/" className="flex items-center gap-2 sm:gap-3 min-w-0">
               <img src="/favicon-zailon.ico" alt="Logo" className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex-shrink-0" />
-              <span className="text-base sm:text-lg font-bold text-foreground truncate">ZAILON</span>
+              <span className="text-base sm:text-lg font-bold text-foreground truncate">JVS Soluções</span>
             </Link>
             <div className="flex items-center gap-1.5 sm:gap-3">
               <ThemeToggle />
               <Link to="/login">
                 <Button variant="outline" size="sm">Entrar</Button>
               </Link>
-              <a href="https://wa.me/5546991163405?text=Olá! Quero conhecer o ZAILON" target="_blank" rel="noopener noreferrer">
+              <Link to="/login">
                 <Button variant="default" size="sm" className="btn-primary-glow">
                   <Rocket className="w-4 h-4" />
-                  <span className="hidden sm:inline">Falar com a equipe</span>
+                  <span className="hidden sm:inline">Criar minha conta</span>
                   <span className="sm:hidden">Contato</span>
                 </Button>
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -185,13 +185,13 @@ const HomePage = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 px-2">
-              <a href="https://wa.me/5546991163405?text=Olá! Quero conhecer o ZAILON" target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto">
+              <Link to="/login" className="w-full sm:w-auto">
                 <Button variant="premium" size="lg" className="animate-glow-pulse w-full sm:w-auto">
                   <MessageCircle className="w-5 h-5" />
-                  Falar com a equipe
+                  Criar minha conta
                   <ArrowRight className="w-5 h-5" />
                 </Button>
-              </a>
+              </Link>
             </div>
 
             <p className="text-[11px] sm:text-xs text-muted-foreground mt-4">✓ Atendimento humano · ✓ Suporte premium · ✓ Setup rápido</p>
@@ -387,12 +387,12 @@ const HomePage = () => {
                 </div>
               </div>
 
-              <a href="https://wa.me/5546991163405?text=Olá! Quero contratar o ZAILON" target="_blank" rel="noopener noreferrer" className="block">
+              <Link to="/login" className="block">
                 <Button variant="premium" size="lg" className="w-full animate-glow-pulse mb-3">
                   <MessageCircle className="w-5 h-5" />
-                  Falar com a equipe
+                  Criar minha conta
                 </Button>
-              </a>
+              </Link>
               <p className="text-xs text-muted-foreground">Atendimento humano · resposta rápida via WhatsApp</p>
             </div>
           </AnimatedSection>
@@ -407,10 +407,10 @@ const HomePage = () => {
           </AnimatedSection>
 
           {[
-            { q: 'Preciso instalar algo?', a: 'Não! O ZAILON é 100% online. Basta acessar pelo navegador do celular ou computador.' },
+            { q: 'Preciso instalar algo?', a: 'Não! O JVS Soluções é 100% online. Basta acessar pelo navegador do celular ou computador.' },
             { q: 'Posso cancelar quando quiser?', a: 'Sim, sem multas nem contratos. Cancele a qualquer momento pelo painel.' },
             { q: 'Quantos veículos posso cadastrar?', a: 'Ilimitado! Cadastre quantos veículos precisar sem custo adicional.' },
-            { q: 'Como meus clientes acessam o catálogo?', a: 'Você recebe um link exclusivo (ex: ZAILON.com/loja/sua-loja) para compartilhar por WhatsApp, Instagram ou onde quiser.' },
+            { q: 'Como meus clientes acessam o catálogo?', a: 'Você recebe um link exclusivo (ex: JVS Soluções.com/loja/sua-loja) para compartilhar por WhatsApp, Instagram ou onde quiser.' },
             { q: 'Os dados são seguros?', a: 'Sim! Cada loja tem isolamento total. Ninguém acessa os dados de outra loja. Usamos criptografia e políticas de segurança avançadas.' },
           ].map((faq, index) => (
             <AnimatedSection key={index} delay={index * 0.08}>
@@ -443,16 +443,16 @@ const HomePage = () => {
                   Pronto para acelerar suas vendas?
                 </h2>
                 <p className="text-muted-foreground max-w-lg mx-auto mb-6">
-                  Junte-se a dezenas de lojas que já estão vendendo mais com ZAILON
+                  Junte-se a dezenas de lojas que já estão vendendo mais com JVS Soluções
                 </p>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4">
-                  <a href="https://wa.me/5546991163405?text=Olá! Quero conhecer o ZAILON" target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto">
+                  <Link to="/login" className="w-full sm:w-auto">
                     <Button variant="premium" size="lg" className="animate-glow-pulse w-full sm:w-auto">
                       <MessageCircle className="w-5 h-5" />
-                      Falar com a equipe
+                      Criar minha conta
                       <ArrowRight className="w-5 h-5" />
                     </Button>
-                  </a>
+                  </Link>
                   <Link to="/login" className="w-full sm:w-auto">
                     <Button variant="glass" size="lg" className="w-full sm:w-auto">
                       Loguin
@@ -471,7 +471,7 @@ const HomePage = () => {
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <img src="/favicon.ico" alt="Logo" className="w-8 h-8 rounded-lg" />
-              <span className="text-sm text-muted-foreground">ZAILON © {new Date().getFullYear()}</span>
+              <span className="text-sm text-muted-foreground">JVS Soluções © {new Date().getFullYear()}</span>
             </div>
             <div className="flex items-center gap-6 text-sm text-muted-foreground">
               <Link to="/demo" className="hover:text-cyan-400 transition-colors">Demo</Link>
