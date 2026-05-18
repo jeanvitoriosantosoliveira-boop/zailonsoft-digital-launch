@@ -118,13 +118,31 @@ const LoginPage = () => {
       {/* Left Panel */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-6 md:p-12">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center justify-between mb-6">
             <Link to="/" className="inline-flex items-center gap-3">
-              <img src="/favicon-zailon.ico" alt="Logo" className="w-10 h-10 rounded-2xl shadow-glow-md" />
-              <span className="text-xl font-bold text-foreground">ZAILON</span>
+              <span className="text-xl font-bold text-foreground">JVS<span className="text-gradient"> Soluções</span></span>
             </Link>
             <ThemeToggle />
           </div>
+
+          {/* Toggle Login / Signup */}
+          <div className="flex p-1 rounded-2xl bg-muted/40 mb-6">
+            <button
+              type="button"
+              onClick={() => setMode('login')}
+              className={`flex-1 py-2 rounded-xl text-sm font-medium transition-all ${mode === 'login' ? 'bg-background text-foreground shadow' : 'text-muted-foreground'}`}
+            >
+              Entrar
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode('signup')}
+              className={`flex-1 py-2 rounded-xl text-sm font-medium transition-all ${mode === 'signup' ? 'bg-background text-foreground shadow' : 'text-muted-foreground'}`}
+            >
+              Criar conta + loja
+            </button>
+          </div>
+
 
           <AnimatePresence mode="wait">
             {mode === 'login' ? (
@@ -177,10 +195,13 @@ const LoginPage = () => {
                 onSubmit={handleSignup}
                 className="space-y-4"
               >
-                <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-1">Crie sua loja</h1>
+                <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-1">Crie sua conta + loja</h1>
                 <p className="text-muted-foreground text-sm mb-4">
-                  Preencha os dados para criar seu acesso. A liberação do sistema é feita pela nossa equipe após contato.
+                  Cadastro rápido. Após criar a conta, ative sua assinatura (R$ 99/mês) para liberar o acesso.
                 </p>
+
+                {/* DADOS DA LOJA */}
+                <p className="text-xs uppercase tracking-wider text-cyan-400 font-semibold pt-2">Dados da loja</p>
 
                 <div>
                   <label className="block text-sm font-medium text-muted-foreground mb-2">Nome da loja *</label>
@@ -191,7 +212,65 @@ const LoginPage = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-muted-foreground mb-2">Seu nome</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">Descrição curta</label>
+                  <div className="relative">
+                    <FileText className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <Input value={descricao} onChange={(e) => setDescricao(e.target.value)} placeholder="Multimarcas em Pato Branco - PR" className="pl-12" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-muted-foreground mb-2">Cidade</label>
+                    <div className="relative">
+                      <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                      <Input value={cidade} onChange={(e) => setCidade(e.target.value)} placeholder="Pato Branco" className="pl-12" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-muted-foreground mb-2">UF</label>
+                    <Input value={estado} onChange={(e) => setEstado(e.target.value)} placeholder="PR" maxLength={2} />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">WhatsApp da loja</label>
+                  <div className="relative">
+                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <Input value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="(46) 99999-0000" className="pl-12" />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">Email comercial</label>
+                  <div className="relative">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <Input type="email" value={businessEmail} onChange={(e) => setBusinessEmail(e.target.value)} placeholder="contato@sualoja.com" className="pl-12" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-muted-foreground mb-2">Site</label>
+                    <div className="relative">
+                      <Globe className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                      <Input value={site} onChange={(e) => setSite(e.target.value)} placeholder="https://" className="pl-12" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-muted-foreground mb-2">Instagram</label>
+                    <div className="relative">
+                      <Instagram className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                      <Input value={instagram} onChange={(e) => setInstagram(e.target.value)} placeholder="@sualoja" className="pl-12" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* DADOS DO USUÁRIO */}
+                <p className="text-xs uppercase tracking-wider text-cyan-400 font-semibold pt-4">Seus dados de acesso</p>
+
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">Seu nome *</label>
                   <div className="relative">
                     <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <Input value={ownerName} onChange={(e) => setOwnerName(e.target.value)} placeholder="João Silva" className="pl-12" />
@@ -199,7 +278,7 @@ const LoginPage = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-muted-foreground mb-2">WhatsApp</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">Telefone pessoal</label>
                   <div className="relative">
                     <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="(11) 99999-0000" className="pl-12" />
@@ -207,7 +286,7 @@ const LoginPage = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-muted-foreground mb-2">Email *</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">Email de login *</label>
                   <div className="relative">
                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com" className="pl-12" />
@@ -224,6 +303,7 @@ const LoginPage = () => {
                     </button>
                   </div>
                 </div>
+
 
                 <Button type="submit" variant="premium" size="lg" className="w-full" disabled={isLoading || redirecting}>
                   {isLoading || redirecting ? (
