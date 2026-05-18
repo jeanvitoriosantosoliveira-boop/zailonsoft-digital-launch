@@ -1,6 +1,6 @@
 // Edge Function: signup-store
-// Criação pública de conta + loja (chamada da tela de login)
-// Cria usuário, loja vinculada, e assinatura inicial em "trial" (pending_payment até super-admin liberar).
+// Criação pública de conta + loja + profile.
+// Cria assinatura inicial pending_payment até o Stripe confirmar.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
@@ -34,14 +34,30 @@ Deno.serve(async (req) => {
   );
 
   try {
-    const { email, password, store_name, phone, owner_name } = await req.json();
+    const body = await req.json();
+    const {
+      email,
+      password,
+      store_name,
+      owner_name,
+      phone,
+      whatsapp,
+      business_email,
+      site,
+      descricao,
+      localizacao,
+      horario_funcionamento,
+      redes_sociais,
+      username,
+    } = body;
+
     if (!email || !password || !store_name) {
       return json({ error: "Campos obrigatórios: email, password, store_name" }, 400);
     }
     if (password.length < 6) return json({ error: "Senha deve ter no mínimo 6 caracteres." }, 400);
 
-    // Slug único
-    let baseSlug = slugify(store_name) || `loja-${Date.now()}`;
+    // slug único
+    const baseSlug = slugify(store_name) || `loja-${Date.now()}`;
     let slug = baseSlug;
     let i = 1;
     while (true) {
@@ -55,7 +71,7 @@ Deno.serve(async (req) => {
       email,
       password,
       email_confirm: true,
-      user_metadata: { store_name },
+      user_metadata: { store_name, owner_name },
     });
     if (uerr) return json({ error: uerr.message }, 400);
     const userId = created.user!.id;
@@ -65,9 +81,15 @@ Deno.serve(async (req) => {
       .insert({
         slug,
         nome: store_name,
-        email,
+        email: business_email || email,
         telefone_principal: phone || null,
+        whatsapp: whatsapp || phone || null,
         proprietario: owner_name || null,
+        descricao: descricao || null,
+        site: site || null,
+        localizacao: localizacao || null,
+        horario_funcionamento: horario_funcionamento || null,
+        redes_sociais: redes_sociais || null,
         user_id: userId,
       })
       .select()
@@ -77,9 +99,17 @@ Deno.serve(async (req) => {
       return json({ error: lerr.message }, 400);
     }
 
-    // Assinatura inicial — pendente até liberação manual pelo super-admin
+    // profile
+    await supabase.from("profiles").upsert({
+      id: userId,
+      username: username || (owner_name ? slugify(owner_name) : null),
+      phone_number: phone || null,
+      updated_at: new Date().toISOString(),
+    });
+
+    // Assinatura inicial — pendente até pagamento no Stripe
     await supabase.from("subscriptions").upsert(
-      { user_id: userId, status: "pending_payment", plan: "trial" },
+      { user_id: userId, status: "pending_payment" },
       { onConflict: "user_id" },
     );
 
