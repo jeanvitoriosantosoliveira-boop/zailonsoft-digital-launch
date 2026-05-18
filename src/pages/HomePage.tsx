@@ -139,7 +139,7 @@ const HomePage = () => {
                   <span className="hidden sm:inline">Criar minha conta</span>
                   <span className="sm:hidden">Contato</span>
                 </Button>
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -191,7 +191,7 @@ const HomePage = () => {
                   Criar minha conta
                   <ArrowRight className="w-5 h-5" />
                 </Button>
-              </a>
+              </Link>
             </div>
 
             <p className="text-[11px] sm:text-xs text-muted-foreground mt-4">✓ Atendimento humano · ✓ Suporte premium · ✓ Setup rápido</p>
@@ -392,7 +392,7 @@ const HomePage = () => {
                   <MessageCircle className="w-5 h-5" />
                   Criar minha conta
                 </Button>
-              </a>
+              </Link>
               <p className="text-xs text-muted-foreground">Atendimento humano · resposta rápida via WhatsApp</p>
             </div>
           </AnimatedSection>
@@ -452,7 +452,7 @@ const HomePage = () => {
                       Criar minha conta
                       <ArrowRight className="w-5 h-5" />
                     </Button>
-                  </a>
+                  </Link>
                   <Link to="/login" className="w-full sm:w-auto">
                     <Button variant="glass" size="lg" className="w-full sm:w-auto">
                       Loguin
