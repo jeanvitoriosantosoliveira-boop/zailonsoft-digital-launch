@@ -133,7 +133,7 @@ const HomePage = () => {
               <Link to="/login">
                 <Button variant="outline" size="sm">Entrar</Button>
               </Link>
-              <a href="https://wa.me/5546991163405?text=Olá! Quero conhecer o JVS Soluções" target="_blank" rel="noopener noreferrer">
+              <Link to="/login">
                 <Button variant="default" size="sm" className="btn-primary-glow">
                   <Rocket className="w-4 h-4" />
                   <span className="hidden sm:inline">Criar minha conta</span>
@@ -185,7 +185,7 @@ const HomePage = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 px-2">
-              <a href="https://wa.me/5546991163405?text=Olá! Quero conhecer o JVS Soluções" target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto">
+              <Link to="/login" className="w-full sm:w-auto">
                 <Button variant="premium" size="lg" className="animate-glow-pulse w-full sm:w-auto">
                   <MessageCircle className="w-5 h-5" />
                   Criar minha conta
@@ -387,7 +387,7 @@ const HomePage = () => {
                 </div>
               </div>
 
-              <a href="https://wa.me/5546991163405?text=Olá! Quero contratar o JVS Soluções" target="_blank" rel="noopener noreferrer" className="block">
+              <Link to="/login" className="block">
                 <Button variant="premium" size="lg" className="w-full animate-glow-pulse mb-3">
                   <MessageCircle className="w-5 h-5" />
                   Criar minha conta
@@ -446,7 +446,7 @@ const HomePage = () => {
                   Junte-se a dezenas de lojas que já estão vendendo mais com JVS Soluções
                 </p>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4">
-                  <a href="https://wa.me/5546991163405?text=Olá! Quero conhecer o JVS Soluções" target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto">
+                  <Link to="/login" className="w-full sm:w-auto">
                     <Button variant="premium" size="lg" className="animate-glow-pulse w-full sm:w-auto">
                       <MessageCircle className="w-5 h-5" />
                       Criar minha conta
