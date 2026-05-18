@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
 const MainLayout = () => {
-  const { isLoggedIn, isActive, user, logout, lojaSlug, lojaInfo, loading } = useAuth();
+  const { isLoggedIn, isActive, user, logout, lojaSlug, lojaInfo, loading, subscription } = useAuth();
   const location = useLocation();
   const { lojaSlug: urlSlug } = useParams();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
@@ -38,6 +38,10 @@ const MainLayout = () => {
   }
 
   if (!isActive) {
+    const status = subscription?.status;
+    if (status === 'past_due' || status === 'unpaid') {
+      return <Navigate to="/inadimplente" replace />;
+    }
     return <Navigate to="/assinar" replace />;
   }
 
