@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff, ArrowRight, MessageCircle, Store, User, Phone } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, MessageCircle, Store, User, Phone, MapPin, Globe, Instagram, FileText } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,19 +18,32 @@ const LoginPage = () => {
   const [storeName, setStoreName] = useState('');
   const [ownerName, setOwnerName] = useState('');
   const [phone, setPhone] = useState('');
+  const [whatsapp, setWhatsapp] = useState('');
+  const [businessEmail, setBusinessEmail] = useState('');
+  const [descricao, setDescricao] = useState('');
+  const [site, setSite] = useState('');
+  const [cidade, setCidade] = useState('');
+  const [estado, setEstado] = useState('');
+  const [instagram, setInstagram] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
 
-  const { login, isLoggedIn, lojaSlug, loading: authLoading } = useAuth();
+  const { login, isLoggedIn, lojaSlug, loading: authLoading, subscription } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
   React.useEffect(() => {
-    if (!authLoading && isLoggedIn && lojaSlug) {
-      navigate(`/${lojaSlug}/dashboard`, { replace: true });
+    if (!authLoading && isLoggedIn) {
+      if (subscription?.status === 'active' && lojaSlug) {
+        navigate(`/${lojaSlug}/dashboard`, { replace: true });
+      } else if (subscription?.status === 'past_due' || subscription?.status === 'unpaid') {
+        navigate('/inadimplente', { replace: true });
+      } else {
+        navigate('/assinar', { replace: true });
+      }
     }
-  }, [authLoading, isLoggedIn, lojaSlug, navigate]);
+  }, [authLoading, isLoggedIn, lojaSlug, subscription, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,18 +78,34 @@ const LoginPage = () => {
     setIsLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('signup-store', {
-        body: { email, password, store_name: storeName, owner_name: ownerName, phone },
+        body: {
+          email,
+          password,
+          store_name: storeName,
+          owner_name: ownerName,
+          phone,
+          whatsapp: whatsapp || phone,
+          business_email: businessEmail || email,
+          descricao,
+          site,
+          localizacao: cidade || estado ? { cidade, estado } : null,
+          redes_sociais: instagram ? { instagram } : null,
+        },
       });
       if (error) throw new Error(error.message);
       if (data?.error) throw new Error(data.error);
 
       toast({
-        title: 'Conta criada com sucesso!',
-        description: 'Faremos o login agora. O acesso ao sistema depende da liberação da equipe.',
+        title: 'Conta criada!',
+        description: 'Agora ative sua assinatura para liberar o acesso.',
       });
       const ok = await login?.(email, password);
-      if (ok) setRedirecting(true);
-      else setMode('login');
+      if (ok) {
+        setRedirecting(true);
+        // o useEffect redireciona para /assinar
+      } else {
+        setMode('login');
+      }
     } catch (err: any) {
       toast({ title: 'Erro ao criar conta', description: err.message, variant: 'destructive' });
     } finally {
