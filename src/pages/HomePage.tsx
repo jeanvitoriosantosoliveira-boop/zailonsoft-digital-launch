@@ -1,16 +1,17 @@
 import React, { useRef } from 'react';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { 
-  Check, ArrowRight, Zap, Users, BarChart3, Package, Headphones, Shield, 
-  MessageCircle, ChevronDown, Instagram, Car, Gauge, Clock, Star, 
-  TrendingUp, Lock, Eye, Smartphone, Globe, CreditCard, Rocket,
-  Award, Target, Layers, UserPlus
+import {
+  Check, ArrowRight, Zap, Users, BarChart3, Package, Shield,
+  MessageCircle, ChevronDown, Instagram, Car, Clock, Star,
+  TrendingUp, Smartphone, Globe, CreditCard, Rocket,
+  Sparkles, Layers, ShieldCheck, Timer, X, PlayCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import heroCarImage from '@/assets/hero-car.jpg';
+import zailonHeroCar from '@/assets/zailon-hero-car.jpg';
+import zailonLogo from '@/assets/zailon-logo.png';
 import { ThemeToggle } from '@/components/ThemeToggle';
-// Animated section wrapper
+
 const AnimatedSection = ({ children, className = '', delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.15 });
@@ -27,21 +28,20 @@ const AnimatedSection = ({ children, className = '', delay = 0 }: { children: Re
   );
 };
 
-// Speedometer-style counter
-const SpeedCounter = ({ value, label }: { value: string; label: string }) => {
+const Stat = ({ value, label, sub }: { value: string; label: string; sub?: string }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true });
   return (
-    <motion.div ref={ref} className="text-center">
-      <motion.p
-        initial={{ opacity: 0, scale: 0.5 }}
-        animate={isInView ? { opacity: 1, scale: 1 } : {}}
-        transition={{ type: 'spring', bounce: 0.4, duration: 0.8 }}
-        className="text-3xl md:text-5xl font-bold text-gradient mb-2"
-      >
-        {value}
-      </motion.p>
-      <p className="text-sm text-muted-foreground">{label}</p>
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, scale: 0.85 }}
+      animate={isInView ? { opacity: 1, scale: 1 } : {}}
+      transition={{ type: 'spring', bounce: 0.35, duration: 0.8 }}
+      className="text-center"
+    >
+      <p className="text-3xl md:text-5xl font-bold text-gradient leading-none">{value}</p>
+      <p className="text-sm font-medium text-foreground mt-2">{label}</p>
+      {sub && <p className="text-xs text-muted-foreground mt-1">{sub}</p>}
     </motion.div>
   );
 };
@@ -49,95 +49,96 @@ const SpeedCounter = ({ value, label }: { value: string; label: string }) => {
 const HomePage = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
-
   const heroImageY = useTransform(scrollYProgress, [0, 1], ['0%', '30%']);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
   const heroScale = useTransform(scrollYProgress, [0, 1], [1, 1.15]);
 
+  const painPoints = [
+    'Fotos perdidas em conversas do WhatsApp',
+    'Leads esquecidos por falta de follow-up',
+    'Planilhas confusas e sem controle real',
+    'Sem ideia de qual veículo gera mais interesse',
+    'Atendimento manual repetitivo e demorado',
+    'Aparência amadora afastando clientes premium',
+  ];
+
+  const gains = [
+    'Catálogo online profissional com link único',
+    'CRM Kanban: cada lead na palma da mão',
+    'Dashboard com vendas, conversão e origem',
+    'Veículos com fotos HD em segundos',
+    'Pré-atendimento automático qualifica o lead',
+    'Imagem premium que vende sozinha',
+  ];
+
   const features = [
-    { icon: Package, title: 'Catálogo Premium', description: 'Feed visual estilo Instagram com fotos HD, filtros e compartilhamento direto' },
-    { icon: Users, title: 'CRM Inteligente', description: 'Kanban visual para acompanhar cada lead do primeiro contato até a venda' },
-    { icon: BarChart3, title: 'Dashboard Completo', description: 'KPIs em tempo real: conversão, funil de vendas, origens e ticket médio' },
-    { icon: Zap, title: 'WhatsApp Integrado', description: 'Botão direto de contato em cada veículo, com mensagem pré-configurada' },
-    { icon: Shield, title: 'Multi-tenancy Seguro', description: 'Isolamento total por loja. Cada cliente vê apenas seus dados, garantido por RLS' },
-    { icon: Headphones, title: 'Suporte Premium', description: 'Atendimento dedicado via WhatsApp com resposta em até 2 horas' },
-    { icon: Globe, title: 'Link Exclusivo', description: 'Cada loja recebe uma URL única para compartilhar o catálogo online com clientes' },
-    { icon: Smartphone, title: '100% Responsivo', description: 'Interface adaptada para celular, tablet e desktop. Perfeito para uso em campo' },
-    { icon: Lock, title: 'Acesso Protegido', description: 'Sistema de login seguro com controle de assinatura e proteção de dados' },
-  ];
-
-  const problems = [
-    { problem: 'Fotos espalhadas no WhatsApp', solution: 'Catálogo profissional organizado com link exclusivo' },
-    { problem: 'Perder leads por falta de controle', solution: 'CRM Kanban com histórico completo de cada cliente' },
-    { problem: 'Não saber de onde vêm as vendas', solution: 'Dashboard com métricas de origem e conversão' },
-    { problem: 'Gastar horas com planilhas', solution: 'Sistema pronto que faz tudo automaticamente' },
-  ];
-
-  const testimonials = [
-    // { name: 'Roberto S.', role: 'Auto King Veículos', text: 'Triplicamos nossos leads em 2 meses. O catálogo online é um diferencial enorme.' },
-    // { name: 'Marcela P.', role: 'MP Motors', text: 'Nunca mais perdi um cliente por falta de follow-up. O CRM é sensacional.' },
-    // { name: 'Carlos D.', role: 'CD Premium Cars', text: 'Investimento que se paga no primeiro mês. Simples, bonito e funcional.' },
+    { icon: Package, title: 'Catálogo Premium', desc: 'Feed visual estilo Instagram com fotos HD, filtros e link exclusivo da sua loja.' },
+    { icon: Users, title: 'CRM Kanban', desc: 'Acompanhe cada lead do primeiro toque até a venda. Nunca mais perca um cliente.' },
+    { icon: BarChart3, title: 'Dashboard 360°', desc: 'KPIs em tempo real: funil, conversão, origem dos leads e ticket médio.' },
+    { icon: Zap, title: 'WhatsApp 1‑clique', desc: 'Botão direto em cada veículo, com mensagem pronta. Atendimento sem atrito.' },
+    { icon: Shield, title: 'Isolamento por Loja', desc: 'Multi‑tenancy seguro. Seus dados são só seus, protegidos por RLS.' },
+    { icon: Smartphone, title: 'Mobile‑First', desc: 'Operação completa pelo celular. Cadastre, atenda e venda em campo.' },
   ];
 
   const steps = [
-    { step: '01', title: 'Assine o plano', description: 'Crie sua conta e ative sua assinatura em menos de 2 minutos', icon: CreditCard },
-    { step: '02', title: 'Configure sua loja', description: 'Adicione logo, dados de contato e personalize seu catálogo', icon: Layers },
-    { step: '03', title: 'Cadastre veículos', description: 'Suba fotos, preencha os dados e publique instantaneamente', icon: Car },
-    { step: '04', title: 'Comece a vender', description: 'Compartilhe o link do catálogo e receba leads pelo WhatsApp', icon: Rocket },
+    { step: '01', title: 'Crie sua conta', desc: 'Cadastro em menos de 2 minutos. Ative seu plano e comece.', icon: CreditCard },
+    { step: '02', title: 'Personalize a loja', desc: 'Logo, contato, redes sociais. Tudo com a sua cara.', icon: Layers },
+    { step: '03', title: 'Suba os veículos', desc: 'Fotos HD, dados e preço. Publicação instantânea.', icon: Car },
+    { step: '04', title: 'Venda mais', desc: 'Compartilhe seu link. Receba leads qualificados no WhatsApp.', icon: Rocket },
+  ];
+
+  const planFeatures = [
+    'Catálogo online profissional com link exclusivo',
+    'CRM Kanban completo com histórico de atendimento',
+    'Dashboard com métricas e KPIs em tempo real',
+    'Pré‑atendimento automático que qualifica leads',
+    'Upload ilimitado de fotos HD por veículo',
+    'Multi‑tenancy seguro com isolamento por loja',
+    'Suporte premium via WhatsApp',
+    'Interface 100% responsiva (mobile, tablet, desktop)',
+    'Sem limite de veículos ou leads cadastrados',
+    'Atualizações e novas funcionalidades grátis',
   ];
 
   return (
-    <div className="min-h-screen overflow-hidden">
-      {/* Animated background particles */}
+    <div className="min-h-screen overflow-hidden bg-background">
+      {/* Background particles */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
         {[...Array(20)].map((_, i) => (
           <motion.div
             key={i}
             className="absolute w-1 h-1 rounded-full bg-cyan-500/20"
             style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%` }}
-            animate={{
-              y: [0, -30, 0],
-              opacity: [0.1, 0.4, 0.1],
-            }}
+            animate={{ y: [0, -30, 0], opacity: [0.1, 0.4, 0.1] }}
             transition={{ duration: 4 + Math.random() * 4, repeat: Infinity, delay: Math.random() * 4 }}
           />
         ))}
-        {/* Road lines animation */}
-        <motion.div
-          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[2px] h-32 bg-gradient-to-t from-cyan-500/20 to-transparent"
-          animate={{ y: [-200, 800] }}
-          transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
-        />
-        <motion.div
-          className="absolute bottom-0 left-[30%] w-[2px] h-20 bg-gradient-to-t from-cyan-500/10 to-transparent"
-          animate={{ y: [-100, 800] }}
-          transition={{ duration: 4, repeat: Infinity, ease: 'linear', delay: 1 }}
-        />
-        <motion.div
-          className="absolute bottom-0 left-[70%] w-[2px] h-20 bg-gradient-to-t from-cyan-500/10 to-transparent"
-          animate={{ y: [-100, 800] }}
-          transition={{ duration: 3.5, repeat: Infinity, ease: 'linear', delay: 2 }}
-        />
       </div>
 
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-white/5">
-        <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
+        <div className="container mx-auto px-3 sm:px-4 py-3">
           <div className="flex items-center justify-between gap-2">
             <Link to="/" className="flex items-center gap-2 sm:gap-3 min-w-0">
-              <img src="/favicon-zailon.ico" alt="Logo" className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex-shrink-0" />
-              <span className="text-base sm:text-lg font-bold text-foreground truncate">JVS Soluções</span>
+              <img src={zailonLogo} alt="Zailon" className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex-shrink-0 object-contain" />
+              <span className="text-base sm:text-lg font-bold text-gradient truncate">Zailon</span>
             </Link>
+            <nav className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
+              <a href="#beneficios" className="hover:text-cyan-400 transition-colors">Benefícios</a>
+              <a href="#recursos" className="hover:text-cyan-400 transition-colors">Recursos</a>
+              <a href="#como-funciona" className="hover:text-cyan-400 transition-colors">Como funciona</a>
+              <a href="#plano" className="hover:text-cyan-400 transition-colors">Plano</a>
+            </nav>
             <div className="flex items-center gap-1.5 sm:gap-3">
               <ThemeToggle />
-              <Link to="/login">
+              <Link to="/login" className="hidden sm:block">
                 <Button variant="outline" size="sm">Entrar</Button>
               </Link>
               <Link to="/login">
                 <Button variant="default" size="sm" className="btn-primary-glow">
                   <Rocket className="w-4 h-4" />
-                  <span className="hidden sm:inline">Criar minha conta</span>
-                  <span className="sm:hidden">Contato</span>
+                  <span className="hidden sm:inline">Começar agora</span>
+                  <span className="sm:hidden">Começar</span>
                 </Button>
               </Link>
             </div>
@@ -145,15 +146,15 @@ const HomePage = () => {
         </div>
       </header>
 
-      {/* Hero */}
+      {/* HERO */}
       <section ref={heroRef} className="relative min-h-[100svh] flex items-center justify-center pt-24 sm:pt-28 pb-16 overflow-hidden">
         <motion.div style={{ y: heroImageY, scale: heroScale, opacity: heroOpacity }} className="absolute inset-0 z-0">
-          <img src={heroCarImage} alt="Luxury car" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/60 to-background" />
-          <div className="absolute inset-0 bg-gradient-to-r from-background/60 via-transparent to-background/60" />
+          <img src={zailonHeroCar} alt="Loja de veículos premium" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/75 to-background" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background/70 via-transparent to-background/70" />
         </motion.div>
 
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[90vw] md:w-[900px] h-[300px] md:h-[500px] bg-cyan-500/8 rounded-full blur-[100px] md:blur-[150px] z-0" />
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[90vw] md:w-[900px] h-[300px] md:h-[500px] bg-cyan-500/10 rounded-full blur-[100px] md:blur-[150px] z-0" />
 
         <div className="relative z-10 container mx-auto px-4 text-center">
           <motion.div
@@ -162,112 +163,152 @@ const HomePage = () => {
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
             <motion.div
-              animate={{ scale: [1, 1.02, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-red-500/10 border border-red-500/20 mb-3 sm:mb-4 backdrop-blur-sm"
+              animate={{ scale: [1, 1.04, 1] }}
+              transition={{ duration: 2.4, repeat: Infinity }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/30 mb-5 backdrop-blur-sm"
             >
-              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+              <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+              <span className="text-xs sm:text-sm font-semibold text-cyan-300">Plataforma #1 para lojas de veículos</span>
             </motion.div>
 
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-cyan-500/10 border border-cyan-500/20 mb-4 sm:mb-6 backdrop-blur-sm">
-              <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400" />
-              <span className="text-[11px] sm:text-sm font-medium text-cyan-400">Plataforma SaaS para Lojas de Veículos</span>
-            </div>
-
-            <h1 className="text-[2rem] sm:text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-4 sm:mb-6 leading-[1.1]" style={{ textShadow: '0 2px 20px rgba(0,0,0,0.5)' }}>
-              Sua loja de veículos
-              <span className="text-gradient block">no próximo nível</span>
+            <h1 className="text-[2.25rem] sm:text-5xl md:text-7xl font-bold text-white mb-5 leading-[1.05] tracking-tight" style={{ textShadow: '0 2px 30px rgba(0,0,0,0.6)' }}>
+              Sua loja vende sozinha
+              <span className="text-gradient block mt-2">enquanto você dorme</span>
             </h1>
 
-            <p className="text-base sm:text-lg md:text-xl text-white/70 max-w-2xl mx-auto mb-6 sm:mb-8 px-2" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.5)' }}>
-              Catálogo profissional, CRM completo e dashboard de vendas.
-              <strong className="text-white"> Tudo pronto para usar em minutos.</strong>
+            <p className="text-base sm:text-lg md:text-2xl text-white/85 max-w-3xl mx-auto mb-8 px-2 leading-relaxed" style={{ textShadow: '0 1px 12px rgba(0,0,0,0.6)' }}>
+              Catálogo profissional, CRM e dashboard num só sistema.
+              <strong className="text-white"> Mais leads, menos esforço, vendas no automático.</strong>
             </p>
 
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 px-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 px-2 mb-5">
               <Link to="/login" className="w-full sm:w-auto">
-                <Button variant="premium" size="lg" className="animate-glow-pulse w-full sm:w-auto">
-                  <MessageCircle className="w-5 h-5" />
-                  Criar minha conta
+                <Button variant="premium" size="lg" className="animate-glow-pulse w-full sm:w-auto text-base">
+                  <Rocket className="w-5 h-5" />
+                  Quero vender mais agora
                   <ArrowRight className="w-5 h-5" />
+                </Button>
+              </Link>
+              <Link to="/demo" className="w-full sm:w-auto">
+                <Button variant="outline" size="lg" className="w-full sm:w-auto backdrop-blur-md bg-white/5">
+                  <PlayCircle className="w-5 h-5" />
+                  Ver demonstração
                 </Button>
               </Link>
             </div>
 
-            <p className="text-[11px] sm:text-xs text-muted-foreground mt-4">✓ Atendimento humano · ✓ Suporte premium · ✓ Setup rápido</p>
+            <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] sm:text-xs text-white/70">
+              <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-400" /> Sem fidelidade</span>
+              <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-400" /> Setup em minutos</span>
+              <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-400" /> Suporte humano</span>
+              <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-400" /> Cancele quando quiser</span>
+            </div>
           </motion.div>
 
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }} className="mt-10 sm:mt-16">
-            <a href="#features" className="inline-flex flex-col items-center text-white/50 hover:text-cyan-400 transition-colors">
-              <span className="text-xs sm:text-sm mb-2">Saiba mais</span>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }} className="mt-12 sm:mt-16">
+            <a href="#beneficios" className="inline-flex flex-col items-center text-white/50 hover:text-cyan-400 transition-colors">
+              <span className="text-xs sm:text-sm mb-2">Descubra como</span>
               <ChevronDown className="w-5 h-5 animate-bounce" />
             </a>
           </motion.div>
         </div>
       </section>
 
-      {/* Social proof stats */}
-      {/* Problems we solve */}
-      <section className="py-20 relative">
+      {/* STATS / SOCIAL PROOF */}
+      <section className="py-12 relative border-y border-white/5 bg-background-elevated/30">
         <div className="container mx-auto px-4">
-          <AnimatedSection className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Chega de perder vendas
-            </h2>
-            <p className="text-muted-foreground max-w-lg mx-auto">
-              Problemas que toda loja de veículos enfrenta — e como resolvemos cada um
-            </p>
-          </AnimatedSection>
-
-          <div className="grid md:grid-cols-2 gap-6">
-            {problems.map((item, index) => (
-              <AnimatedSection key={index} delay={index * 0.1}>
-                <div className="glass-card p-6 rounded-2xl flex gap-4 items-start">
-                  <div className="flex flex-col items-center gap-2 flex-shrink-0">
-                    <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center">
-                      <span className="text-red-400 text-lg">✗</span>
-                    </div>
-                    <div className="w-0.5 h-6 bg-gradient-to-b from-red-500/30 to-emerald-500/30" />
-                    <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
-                      <Check className="w-5 h-5 text-emerald-400" />
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-red-400 text-sm font-medium mb-1 line-through">{item.problem}</p>
-                    <p className="text-white font-medium">{item.solution}</p>
-                  </div>
-                </div>
-              </AnimatedSection>
-            ))}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <Stat value="+3x" label="Mais leads" sub="vs WhatsApp avulso" />
+            <Stat value="2 min" label="Para começar" sub="Setup express" />
+            <Stat value="24/7" label="Catálogo no ar" sub="Vendendo por você" />
+            <Stat value="100%" label="No celular" sub="Opera de qualquer lugar" />
           </div>
         </div>
       </section>
 
-      {/* Features */}
-      <section id="features" className="py-20 relative">
+      {/* ANTES vs DEPOIS — neuromarketing loss aversion */}
+      <section id="beneficios" className="py-20 relative">
         <div className="container mx-auto px-4">
-          <AnimatedSection className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/20 mb-4">
-              <Gauge className="w-4 h-4 text-cyan-400" />
-              <span className="text-sm font-medium text-cyan-400">Tudo que você precisa</span>
+          <AnimatedSection className="text-center mb-14 max-w-2xl mx-auto">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 mb-4">
+              <Timer className="w-3.5 h-3.5 text-red-400" />
+              <span className="text-xs font-semibold text-red-300">Cada dia sem o Zailon é dinheiro perdido</span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Uma plataforma completa
+            <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-4 leading-tight">
+              A diferença entre <span className="text-red-400">perder</span> e <span className="text-gradient">vender</span>
             </h2>
-            <p className="text-muted-foreground max-w-lg mx-auto">
-              Ferramentas profissionais que transformam sua loja em uma máquina de vendas
+            <p className="text-muted-foreground">
+              Quem opera sem sistema, perde. Quem usa o Zailon, escala.
             </p>
           </AnimatedSection>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {features.map((feature, index) => (
-              <AnimatedSection key={index} delay={index * 0.06}>
-                <div className="glass-card p-6 rounded-2xl group hover:border-cyan-500/30 transition-all duration-300 h-full">
-                  <div className="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center mb-4 group-hover:bg-cyan-500/20 transition-colors">
-                    <feature.icon className="w-6 h-6 text-cyan-400" />
+          <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+            {/* SEM Zailon */}
+            <AnimatedSection>
+              <div className="glass-card rounded-3xl p-6 sm:p-8 border-red-500/20 relative">
+                <div className="absolute -top-3 left-6 px-3 py-1 rounded-full bg-red-500/20 border border-red-500/30 text-xs font-bold text-red-300 uppercase tracking-wide">Sem Zailon</div>
+                <h3 className="text-xl font-bold text-foreground mt-2 mb-5">O caos de hoje</h3>
+                <ul className="space-y-3">
+                  {painPoints.map((p, i) => (
+                    <li key={i} className="flex items-start gap-3 text-sm">
+                      <div className="w-5 h-5 rounded-full bg-red-500/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <X className="w-3 h-3 text-red-400" />
+                      </div>
+                      <span className="text-muted-foreground line-through decoration-red-500/40">{p}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </AnimatedSection>
+
+            {/* COM Zailon */}
+            <AnimatedSection delay={0.15}>
+              <div className="glass-card rounded-3xl p-6 sm:p-8 border-cyan-500/30 relative shadow-[0_0_60px_-15px_rgba(7,171,216,0.4)]">
+                <div className="absolute -top-3 left-6 px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 text-xs font-bold text-white uppercase tracking-wide">Com Zailon</div>
+                <h3 className="text-xl font-bold text-foreground mt-2 mb-5">A máquina de vendas</h3>
+                <ul className="space-y-3">
+                  {gains.map((g, i) => (
+                    <li key={i} className="flex items-start gap-3 text-sm">
+                      <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Check className="w-3 h-3 text-emerald-400" />
+                      </div>
+                      <span className="text-foreground font-medium">{g}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </AnimatedSection>
+          </div>
+        </div>
+      </section>
+
+      {/* FEATURES */}
+      <section id="recursos" className="py-20 relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-500/5 to-transparent" />
+        <div className="container mx-auto px-4 relative">
+          <AnimatedSection className="text-center mb-14 max-w-2xl mx-auto">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 mb-4">
+              <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+              <span className="text-xs font-semibold text-cyan-300">Tudo em um só lugar</span>
+            </div>
+            <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-4 leading-tight">
+              A plataforma <span className="text-gradient">completa</span> para sua loja
+            </h2>
+            <p className="text-muted-foreground">
+              Recursos profissionais que transformam visitantes em compradores.
+            </p>
+          </AnimatedSection>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {features.map((f, i) => (
+              <AnimatedSection key={i} delay={i * 0.06}>
+                <div className="glass-card p-6 rounded-2xl group hover:border-cyan-500/40 hover:-translate-y-1 transition-all duration-300 h-full relative overflow-hidden">
+                  <div className="absolute -top-12 -right-12 w-32 h-32 rounded-full bg-cyan-500/10 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/10 border border-cyan-500/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <f.icon className="w-6 h-6 text-cyan-400" />
                   </div>
-                  <h3 className="text-lg font-semibold text-white mb-2">{feature.title}</h3>
-                  <p className="text-muted-foreground text-sm">{feature.description}</p>
+                  <h3 className="text-lg font-semibold text-foreground mb-2">{f.title}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">{f.desc}</p>
                 </div>
               </AnimatedSection>
             ))}
@@ -275,28 +316,30 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* How it works */}
-      <section className="py-20 relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/5 via-transparent to-transparent" />
+      {/* HOW IT WORKS */}
+      <section id="como-funciona" className="py-20 relative">
         <div className="container mx-auto px-4">
-          <AnimatedSection className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Comece em <span className="text-gradient">4 passos simples</span>
+          <AnimatedSection className="text-center mb-14 max-w-2xl mx-auto">
+            <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-4 leading-tight">
+              Comece em <span className="text-gradient">4 passos</span>
             </h2>
+            <p className="text-muted-foreground">Do cadastro à primeira venda — mais rápido do que servir um café.</p>
           </AnimatedSection>
 
-          <div className="grid md:grid-cols-4 gap-6">
-            {steps.map((step, index) => (
-              <AnimatedSection key={index} delay={index * 0.15}>
+          <div className="grid md:grid-cols-4 gap-6 relative">
+            {steps.map((s, i) => (
+              <AnimatedSection key={i} delay={i * 0.12}>
                 <div className="relative text-center">
-                  <div className="w-16 h-16 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center mx-auto mb-4">
-                    <step.icon className="w-7 h-7 text-cyan-400" />
+                  <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-500/10 border border-cyan-500/30 flex items-center justify-center mx-auto mb-4">
+                    <s.icon className="w-8 h-8 text-cyan-400" />
+                    <span className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 text-white text-xs font-bold flex items-center justify-center shadow-lg">
+                      {i + 1}
+                    </span>
                   </div>
-                  <span className="text-xs text-cyan-400 font-bold">{step.step}</span>
-                  <h3 className="text-lg font-semibold text-white mt-1 mb-2">{step.title}</h3>
-                  <p className="text-sm text-muted-foreground">{step.description}</p>
-                  {index < steps.length - 1 && (
-                    <div className="hidden md:block absolute top-8 right-0 translate-x-1/2 w-8">
+                  <h3 className="text-lg font-semibold text-foreground mb-2">{s.title}</h3>
+                  <p className="text-sm text-muted-foreground">{s.desc}</p>
+                  {i < steps.length - 1 && (
+                    <div className="hidden md:block absolute top-10 -right-3 z-0">
                       <ArrowRight className="w-5 h-5 text-cyan-500/30" />
                     </div>
                   )}
@@ -306,68 +349,44 @@ const HomePage = () => {
           </div>
         </div>
       </section>
-      {/* Testimonials */}
-      <section className="py-20 relative">
-        <div className="container mx-auto px-4">
-          {/* <AnimatedSection className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Quem usa, <span className="text-gradient">recomenda</span>
-            </h2>
-          </AnimatedSection> */}
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {testimonials.map((t, index) => (
-              <AnimatedSection key={index} delay={index * 0.1}>
-                <div className="glass-card p-6 rounded-2xl h-full flex flex-col">
-                  <div className="flex gap-1 mb-4">
-                    {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 text-cyan-400 fill-cyan-400" />)}
-                  </div>
-                  <p className="text-white/80 text-sm mb-4 flex-1">"{t.text}"</p>
-                  <div className="flex items-center gap-3 pt-4 border-t border-white/5">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400/20 to-blue-400/20 flex items-center justify-center">
-                      <span className="text-cyan-400 font-semibold">{t.name.charAt(0)}</span>
-                    </div>
-                    <div>
-                      <p className="text-white font-medium text-sm">{t.name}</p>
-                      <p className="text-muted-foreground text-xs">{t.role}</p>
-                    </div>
-                  </div>
-                </div>
-              </AnimatedSection>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Plano - sem preço, contato direto */}
-      <section className="py-20 relative">
+      {/* PLANO */}
+      <section id="plano" className="py-20 relative">
         <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/5 via-transparent to-transparent" />
-        <div className="container mx-auto px-4">
-          <AnimatedSection>
-            <div className="max-w-xl mx-auto glass-card p-6 sm:p-8 md:p-10 rounded-3xl text-center relative overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-400 via-blue-400 to-cyan-400" />
-              <p className="text-muted-foreground mb-2">Plano completo profissional</p>
-              <h3 className="text-3xl md:text-4xl font-bold text-gradient mb-4">Tudo incluso</h3>
-              <p className="text-sm text-muted-foreground mb-6">Sistema completo para transformar sua loja de veículos em uma máquina de vendas automatizada. Do primeiro contato até a venda fechada, tudo integrado e funcionando 24/7.</p>
+        <div className="container mx-auto px-4 relative">
+          <AnimatedSection className="text-center mb-12 max-w-2xl mx-auto">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-4">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="text-xs font-semibold text-emerald-300">Sem fidelidade · Cancele quando quiser</span>
+            </div>
+            <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-4 leading-tight">
+              Um plano, <span className="text-gradient">tudo incluso</span>
+            </h2>
+            <p className="text-muted-foreground">
+              Sem upsells, sem letras miúdas. Tudo o que sua loja precisa, por um único valor.
+            </p>
+          </AnimatedSection>
 
-              <div className="space-y-3 text-left mb-8">
-                {[
-                  'Catálogo online profissional com link',
-                  'CRM Kanban completo para controle de atendimento',
-                  'Formulário instantâneo de pré-atendimento automático',
-                  'Dashboard com métricas avançadas e KPIs em tempo real',
-                  'Upload ilimitado de fotos HD para cada veículo',
-                  'Multi-tenancy seguro com isolamento total para sua loja',
-                  'Suporte premium via WhatsApp com resposta rápida',
-                  'Interface 100% responsiva (celular, tablet, desktop)',
-                  'Sistema de login seguro e controle de acesso',
-                  'Atualizações gratuitas e suporte técnico contínuo',
-                  'Sem limite de veículos ou leads cadastrados',
-                  'Análise de origens de leads e funil de vendas',
-                  'Relatórios de conversão e ticket médio automático',
-                ].map((item, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+          <AnimatedSection>
+            <div className="max-w-2xl mx-auto glass-card p-8 sm:p-10 rounded-3xl text-center relative overflow-hidden border-cyan-500/30 shadow-[0_20px_80px_-20px_rgba(7,171,216,0.35)]">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-400 via-blue-400 to-emerald-400" />
+
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/15 border border-cyan-500/30 mb-4">
+                <Star className="w-3 h-3 text-cyan-400 fill-cyan-400" />
+                <span className="text-[11px] font-bold text-cyan-300 uppercase tracking-wide">Plano Zailon Pro</span>
+              </div>
+
+              <div className="flex items-baseline justify-center gap-1 mb-2">
+                <span className="text-2xl text-muted-foreground">R$</span>
+                <span className="text-6xl md:text-7xl font-bold text-gradient leading-none">99</span>
+                <span className="text-lg text-muted-foreground">/mês</span>
+              </div>
+              <p className="text-xs text-muted-foreground mb-8">Menos que um tanque de gasolina. Mais retorno que um vendedor extra.</p>
+
+              <div className="grid sm:grid-cols-2 gap-x-6 gap-y-3 text-left mb-8">
+                {planFeatures.map((item, i) => (
+                  <div key={i} className="flex items-start gap-2.5">
+                    <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
                       <Check className="w-3 h-3 text-emerald-400" />
                     </div>
                     <span className="text-foreground text-sm">{item}</span>
@@ -375,25 +394,17 @@ const HomePage = () => {
                 ))}
               </div>
 
-              <div className="bg-cyan-500/5 rounded-xl p-4 mb-6 border border-cyan-500/20">
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-cyan-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <MessageCircle className="w-4 h-4 text-cyan-400" />
-                  </div>
-                  <div>
-                    <h4 className="text-white font-semibold mb-1">Pré-atendimento inteligente</h4>
-                    <p className="text-sm text-muted-foreground">Formulários automáticos capturam dados completos do cliente (financiamento, troca, visita) antes mesmo do primeiro contato humano, qualificando leads automaticamente.</p>
-                  </div>
-                </div>
-              </div>
-
               <Link to="/login" className="block">
-                <Button variant="premium" size="lg" className="w-full animate-glow-pulse mb-3">
-                  <MessageCircle className="w-5 h-5" />
-                  Criar minha conta
+                <Button variant="premium" size="lg" className="w-full animate-glow-pulse text-base mb-3">
+                  <Rocket className="w-5 h-5" />
+                  Começar agora — R$ 99/mês
+                  <ArrowRight className="w-5 h-5" />
                 </Button>
               </Link>
-              <p className="text-xs text-muted-foreground">Atendimento humano · resposta rápida via WhatsApp</p>
+              <p className="text-xs text-muted-foreground flex items-center justify-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                Pagamento seguro · Suporte premium incluso
+              </p>
             </div>
           </AnimatedSection>
         </div>
@@ -403,62 +414,72 @@ const HomePage = () => {
       <section className="py-20 relative">
         <div className="container mx-auto px-4 max-w-3xl">
           <AnimatedSection className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Perguntas frequentes</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Perguntas frequentes</h2>
+            <p className="text-muted-foreground">Tudo o que você precisa saber antes de começar.</p>
           </AnimatedSection>
 
           {[
-            { q: 'Preciso instalar algo?', a: 'Não! O JVS Soluções é 100% online. Basta acessar pelo navegador do celular ou computador.' },
-            { q: 'Posso cancelar quando quiser?', a: 'Sim, sem multas nem contratos. Cancele a qualquer momento pelo painel.' },
-            { q: 'Quantos veículos posso cadastrar?', a: 'Ilimitado! Cadastre quantos veículos precisar sem custo adicional.' },
-            { q: 'Como meus clientes acessam o catálogo?', a: 'Você recebe um link exclusivo (ex: JVS Soluções.com/loja/sua-loja) para compartilhar por WhatsApp, Instagram ou onde quiser.' },
-            { q: 'Os dados são seguros?', a: 'Sim! Cada loja tem isolamento total. Ninguém acessa os dados de outra loja. Usamos criptografia e políticas de segurança avançadas.' },
-          ].map((faq, index) => (
-            <AnimatedSection key={index} delay={index * 0.08}>
+            { q: 'Preciso instalar algo?', a: 'Não. O Zailon é 100% online. Acesse pelo navegador do celular ou computador, em qualquer lugar.' },
+            { q: 'Posso cancelar quando quiser?', a: 'Sim, sem multas ou contratos. Cancele a qualquer momento pelo painel.' },
+            { q: 'Quantos veículos posso cadastrar?', a: 'Ilimitado. Cadastre quantos veículos precisar, sem custo adicional.' },
+            { q: 'Como meus clientes acessam o catálogo?', a: 'Você recebe um link exclusivo (ex: zailon.com.br/loja/sua-loja) para compartilhar por WhatsApp, Instagram ou onde quiser.' },
+            { q: 'Os dados são seguros?', a: 'Sim. Cada loja tem isolamento total, criptografia e políticas avançadas. Ninguém acessa os dados de outra loja.' },
+            { q: 'Funciona para loja pequena?', a: 'Especialmente. O Zailon foi desenhado para que uma pessoa só consiga operar uma loja inteira sem perder vendas.' },
+          ].map((faq, i) => (
+            <AnimatedSection key={i} delay={i * 0.06}>
               <details className="glass-card rounded-xl mb-3 group">
-                <summary className="flex items-center justify-between p-4 cursor-pointer text-white font-medium hover:text-cyan-400 transition-colors">
-                  {faq.q}
-                  <ChevronDown className="w-4 h-4 text-muted-foreground group-open:rotate-180 transition-transform" />
+                <summary className="flex items-center justify-between p-4 cursor-pointer text-foreground font-medium hover:text-cyan-400 transition-colors list-none">
+                  <span>{faq.q}</span>
+                  <ChevronDown className="w-4 h-4 text-muted-foreground group-open:rotate-180 transition-transform flex-shrink-0 ml-3" />
                 </summary>
-                <p className="px-4 pb-4 text-sm text-muted-foreground">{faq.a}</p>
+                <p className="px-4 pb-4 text-sm text-muted-foreground leading-relaxed">{faq.a}</p>
               </details>
             </AnimatedSection>
           ))}
         </div>
       </section>
 
-      {/* Final CTA */}
+      {/* FINAL CTA */}
       <section className="py-20">
         <div className="container mx-auto px-4">
           <AnimatedSection>
-            <div className="glass-card p-8 md:p-12 rounded-3xl text-center relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-cyan-500/10" />
-              {/* Animated speed lines */}
+            <div className="glass-card p-8 md:p-14 rounded-3xl text-center relative overflow-hidden border-cyan-500/30">
+              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/15 via-blue-500/10 to-emerald-500/10" />
               <motion.div
-                className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent"
+                className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-cyan-400 to-transparent"
                 animate={{ x: ['-100%', '100%'] }}
                 transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
               />
-              <div className="relative z-10">
-                <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                  Pronto para acelerar suas vendas?
+              <div className="relative z-10 max-w-2xl mx-auto">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 mb-5">
+                  <Clock className="w-3.5 h-3.5 text-red-400 animate-pulse" />
+                  <span className="text-xs font-semibold text-red-300">Cada dia parado = leads perdidos</span>
+                </div>
+                <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-4 leading-tight">
+                  Sua próxima venda <span className="text-gradient">começa hoje</span>
                 </h2>
-                <p className="text-muted-foreground max-w-lg mx-auto mb-6">
-                  Junte-se a dezenas de lojas que já estão vendendo mais com JVS Soluções
+                <p className="text-muted-foreground text-lg mb-8">
+                  Em poucos minutos sua loja está no ar, profissional, vendendo e organizada. Sem desculpas.
                 </p>
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3">
                   <Link to="/login" className="w-full sm:w-auto">
-                    <Button variant="premium" size="lg" className="animate-glow-pulse w-full sm:w-auto">
-                      <MessageCircle className="w-5 h-5" />
-                      Criar minha conta
+                    <Button variant="premium" size="lg" className="animate-glow-pulse w-full sm:w-auto text-base">
+                      <Rocket className="w-5 h-5" />
+                      Criar minha conta agora
                       <ArrowRight className="w-5 h-5" />
                     </Button>
                   </Link>
-                  <Link to="/login" className="w-full sm:w-auto">
-                    <Button variant="glass" size="lg" className="w-full sm:w-auto">
-                      Loguin
+                  <a href="https://wa.me/5546991163405" target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto">
+                    <Button variant="outline" size="lg" className="w-full sm:w-auto">
+                      <MessageCircle className="w-5 h-5" />
+                      Falar com especialista
                     </Button>
-                  </Link>
+                  </a>
                 </div>
+                <p className="text-xs text-muted-foreground mt-5 flex items-center justify-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                  Sem fidelidade · Cancele quando quiser · Suporte humano
+                </p>
               </div>
             </div>
           </AnimatedSection>
@@ -466,20 +487,25 @@ const HomePage = () => {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-white/5 py-8">
+      <footer className="border-t border-white/5 py-10 mt-10">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-3">
-              <img src="/favicon.ico" alt="Logo" className="w-8 h-8 rounded-lg" />
-              <span className="text-sm text-muted-foreground">JVS Soluções © {new Date().getFullYear()}</span>
+              <img src={zailonLogo} alt="Zailon" className="w-9 h-9 rounded-lg object-contain" />
+              <div>
+                <p className="text-sm font-semibold text-foreground">Zailon © {new Date().getFullYear()}</p>
+                <p className="text-[11px] text-muted-foreground">Desenvolvido por JVS Soluções</p>
+              </div>
             </div>
-            <div className="flex items-center gap-6 text-sm text-muted-foreground">
+            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
               <Link to="/demo" className="hover:text-cyan-400 transition-colors">Demo</Link>
               <Link to="/login" className="hover:text-cyan-400 transition-colors">Entrar</Link>
               <a href="https://instagram.com/_jvs_solucoes_" target="_blank" rel="noopener noreferrer" className="hover:text-cyan-400 transition-colors flex items-center gap-1">
-                <Instagram className="w-4 h-4" />@_jvs_solucoes_
+                <Instagram className="w-4 h-4" /> Instagram
               </a>
-              <a href="https://wa.me/5546991163405" target="_blank" rel="noopener noreferrer" className="hover:text-cyan-400 transition-colors">WhatsApp</a>
+              <a href="https://wa.me/5546991163405" target="_blank" rel="noopener noreferrer" className="hover:text-cyan-400 transition-colors flex items-center gap-1">
+                <MessageCircle className="w-4 h-4" /> WhatsApp
+              </a>
             </div>
           </div>
         </div>

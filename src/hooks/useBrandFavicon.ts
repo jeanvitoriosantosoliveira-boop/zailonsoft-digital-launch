@@ -3,8 +3,8 @@ import { useEffect } from 'react';
 type FaviconBrand = 'jvs' | 'zailon';
 
 const TITLES: Record<FaviconBrand, string> = {
-  jvs: 'JVS Soluções — Tecnologia que move negócios',
-  zailon: 'ZAILON — Sistema para lojas de veículos',
+  jvs: 'Zailon — A plataforma que vende veículos por você',
+  zailon: 'Zailon — Sistema para lojas de veículos',
 };
 
 const HREFS: Record<FaviconBrand, string> = {

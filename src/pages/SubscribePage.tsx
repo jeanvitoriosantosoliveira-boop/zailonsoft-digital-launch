@@ -68,7 +68,7 @@ const SubscribePage = () => {
   };
 
   const waUrl = `https://wa.me/${SUPPORT_PHONE}?text=${encodeURIComponent(
-    `Olá! Tenho dúvidas sobre a assinatura JVS (${user?.email || ''}).`,
+    `Olá! Tenho dúvidas sobre a assinatura do Zailon (${user?.email || ''}).`,
   )}`;
 
   const isProcessing = params.get('success') === 'true' && subscription?.status !== 'active';
@@ -89,7 +89,7 @@ const SubscribePage = () => {
           </div>
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 mb-4">
             <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-            <span className="text-xs font-medium text-cyan-400">Plano JVS</span>
+            <span className="text-xs font-medium text-cyan-400">Plano Zailon</span>
           </div>
           <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
             Ative sua assinatura
