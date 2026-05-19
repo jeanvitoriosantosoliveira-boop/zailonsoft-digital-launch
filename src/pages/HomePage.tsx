@@ -189,12 +189,6 @@ const HomePage = () => {
                   <ArrowRight className="w-5 h-5" />
                 </Button>
               </Link>
-              <Link to="/demo" className="w-full sm:w-auto">
-                <Button variant="outline" size="lg" className="w-full sm:w-auto backdrop-blur-md bg-white/5">
-                  <PlayCircle className="w-5 h-5" />
-                  Ver demonstração
-                </Button>
-              </Link>
             </div>
 
             <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] sm:text-xs text-white/70">
