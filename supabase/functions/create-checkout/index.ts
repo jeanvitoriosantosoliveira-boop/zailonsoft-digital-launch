@@ -47,12 +47,13 @@ Deno.serve(async (req) => {
     const stripe = new Stripe(stripeKey, { apiVersion: "2024-06-20" });
 
     // Recupera ou cria customer
-    const { data: sub } = await admin
+    const { data: subs } = await admin
       .from("subscriptions")
-      .select("stripe_customer_id")
+      .select("id, stripe_customer_id")
       .eq("user_id", userId)
-      .maybeSingle();
+      .limit(1);
 
+    const sub = subs?.[0];
     let customerId = sub?.stripe_customer_id || null;
     if (!customerId) {
       const customer = await stripe.customers.create({
@@ -64,7 +65,7 @@ Deno.serve(async (req) => {
         await admin
           .from("subscriptions")
           .update({ stripe_customer_id: customerId, status: "pending_payment" })
-          .eq("user_id", userId);
+          .eq("id", sub.id);
       } else {
         await admin.from("subscriptions").insert({
           user_id: userId,
