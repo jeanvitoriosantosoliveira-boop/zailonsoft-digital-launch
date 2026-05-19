@@ -125,8 +125,8 @@ const LoginPage = () => {
       } else {
         setMode('login');
       }
-    } catch (err: any) {
-      toast({ title: 'Erro ao criar conta', description: err.message, variant: 'destructive' });
+    } catch (err: unknown) {
+      toast({ title: 'Erro ao criar conta', description: err instanceof Error ? err.message : 'Tente novamente.', variant: 'destructive' });
     } finally {
       setIsLoading(false);
     }
