@@ -30,9 +30,7 @@ const PublicCatalog = () => {
       setIsLoading(true);
       try {
         const { cars, loja } = await fetchCarsByLojaSlug(lojaSlug);
-        setStoreName(loja.nome || '');
-        setStoreLogo(loja.logo_url || '');
-        setStoreWhatsapp(loja.whatsapp || '5546991163405');
+        setLoja(loja);
         setVehicles(cars.map(car => ({
           id: car.id,
           name: car.nome || '',
