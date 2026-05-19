@@ -68,7 +68,7 @@ const SubscribePage = () => {
   };
 
   const waUrl = `https://wa.me/${SUPPORT_PHONE}?text=${encodeURIComponent(
-    `Olá! Tenho dúvidas sobre a assinatura JVS (${user?.email || ''}).`,
+    `Olá! Tenho dúvidas sobre a assinatura do Zailon (${user?.email || ''}).`,
   )}`;
 
   const isProcessing = params.get('success') === 'true' && subscription?.status !== 'active';
