@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { motion, useScroll, useTransform, useInView } from 'framer-motion';
+import { motion, useInView } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import {
   Check, ArrowRight, Zap, Users, BarChart3, Package, Shield,
@@ -18,9 +18,9 @@ const AnimatedSection = ({ children, className = '', delay = 0 }: { children: Re
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 40, filter: 'blur(6px)' }}
-      animate={isInView ? { opacity: 1, y: 0, filter: 'blur(0px)' } : {}}
-      transition={{ duration: 0.7, delay, ease: [0.16, 1, 0.3, 1] }}
+      initial={{ opacity: 0, y: 24 }}
+      animate={isInView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.5, delay, ease: [0.16, 1, 0.3, 1] }}
       className={className}
     >
       {children}
@@ -28,30 +28,15 @@ const AnimatedSection = ({ children, className = '', delay = 0 }: { children: Re
   );
 };
 
-const Stat = ({ value, label, sub }: { value: string; label: string; sub?: string }) => {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true });
-  return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, scale: 0.85 }}
-      animate={isInView ? { opacity: 1, scale: 1 } : {}}
-      transition={{ type: 'spring', bounce: 0.35, duration: 0.8 }}
-      className="text-center"
-    >
-      <p className="text-3xl md:text-5xl font-bold text-gradient leading-none">{value}</p>
-      <p className="text-sm font-medium text-foreground mt-2">{label}</p>
-      {sub && <p className="text-xs text-muted-foreground mt-1">{sub}</p>}
-    </motion.div>
-  );
-};
+const Stat = ({ value, label, sub }: { value: string; label: string; sub?: string }) => (
+  <div className="text-center">
+    <p className="text-3xl md:text-5xl font-bold text-gradient leading-none">{value}</p>
+    <p className="text-sm font-medium text-foreground mt-2">{label}</p>
+    {sub && <p className="text-xs text-muted-foreground mt-1">{sub}</p>}
+  </div>
+);
 
 const HomePage = () => {
-  const heroRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
-  const heroImageY = useTransform(scrollYProgress, [0, 1], ['0%', '30%']);
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
-  const heroScale = useTransform(scrollYProgress, [0, 1], [1, 1.15]);
 
   const painPoints = [
     'Fotos perdidas em conversas do WhatsApp',
