@@ -90,10 +90,17 @@ const LoginPage = () => {
         },
       });
       if (error) throw error;
-      if (!data.user) throw new Error('Não foi possível criar o usuário.');
+      let createdUser = data.user;
+      if (!createdUser) throw new Error('Não foi possível criar o usuário.');
+
+      if (!data.session) {
+        const { data: sessionData, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+        if (signInError) throw signInError;
+        createdUser = sessionData.user;
+      }
 
       await provisionUserAccount({
-        user: data.user,
+        user: createdUser,
         storeName,
         ownerName,
         phone,
