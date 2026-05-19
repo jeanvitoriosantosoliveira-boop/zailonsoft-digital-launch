@@ -14,11 +14,10 @@ const features = [
   'Catálogo público com link exclusivo',
   'CRM Kanban completo com leads e tarefas',
   'Dashboard de vendas em tempo real',
-  'Integração WhatsApp em cada veículo',
   'Gestão de vendedores e equipe',
   'Multi-loja com isolamento total',
-  'Upload ilimitado de fotos',
-  'Suporte premium via WhatsApp',
+  'Dasboard interativa com todos os dados importantes da sua loja',
+  'Suporte via WhatsApp',
 ];
 
 const SubscribePage = () => {
@@ -51,7 +50,15 @@ const SubscribePage = () => {
   const handleCheckout = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('create-checkout');
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData?.session?.access_token;
+      if (!accessToken) throw new Error('Usuário não autenticado. Faça login novamente.');
+
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
       if (error || data?.error) throw new Error(error?.message || data?.error);
       window.location.href = data.url;
     } catch (e: any) {
