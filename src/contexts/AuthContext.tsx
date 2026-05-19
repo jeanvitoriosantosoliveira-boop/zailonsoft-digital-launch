@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode, useRe
 import { supabase } from '@/services/supabaseClient';
 import { User } from '@supabase/supabase-js';
 import { QueryClient } from '@tanstack/react-query';
+import { provisionUserAccount } from '@/lib/accountProvisioning';
 
 interface Subscription {
   status: 'active' | 'pending_payment' | 'incomplete' | 'canceled' | 'unpaid' | 'past_due' | 'trialing' | null;
@@ -25,7 +26,7 @@ interface AuthContextType {
   lojaInfo: LojaInfo | null;
   lojaLoading: boolean;
   login?: (email: string, password: string) => Promise<boolean>;
-  signup?: (email: string, password: string, meta?: Record<string, any>) => Promise<boolean>;
+  signup?: (email: string, password: string, meta?: Record<string, unknown>) => Promise<boolean>;
   isLoggedIn?: boolean;
   isActive?: boolean;
 }
@@ -55,16 +56,33 @@ export function AuthProvider({ children, queryClient }: { children: ReactNode; q
         .from('subscriptions')
         .select('status')
         .eq('user_id', currentUserId)
-        .maybeSingle();
+        .limit(10);
       if (error) throw error;
       if (reqId !== reqIdRef.current) return; // resposta obsoleta
-      setSubscription(data as Subscription | null);
-    } catch (err: any) {
-      console.error('Erro ao carregar assinatura:', err.message);
+      const rows = (data || []) as Subscription[];
+      setSubscription(rows.find((row) => row.status === 'active') || rows[0] || null);
+    } catch (err: unknown) {
+      console.error('Erro ao carregar assinatura:', err instanceof Error ? err.message : err);
       if (reqId !== reqIdRef.current) return;
       setSubscription(null);
     } finally {
       if (reqId === reqIdRef.current) setSubLoading(false);
+    }
+  };
+
+  const ensureAccountRows = async (currentUser: User) => {
+    const results = await Promise.allSettled([
+      supabase.from('profiles').select('id').eq('id', currentUser.id).maybeSingle(),
+      supabase.from('lojas').select('id').eq('user_id', currentUser.id).limit(1),
+      supabase.from('subscriptions').select('id').eq('user_id', currentUser.id).limit(1),
+    ]);
+
+    const missingProfile = results[0].status === 'fulfilled' && !results[0].value.data;
+    const missingStore = results[1].status === 'fulfilled' && !results[1].value.data?.length;
+    const missingSubscription = results[2].status === 'fulfilled' && !results[2].value.data?.length;
+
+    if (missingProfile || missingStore || missingSubscription) {
+      await provisionUserAccount({ user: currentUser });
     }
   };
 
@@ -84,8 +102,8 @@ export function AuthProvider({ children, queryClient }: { children: ReactNode; q
       if (error) throw error;
       if (reqId !== reqIdRef.current) return;
       setLojaInfo(data as LojaInfo | null);
-    } catch (err: any) {
-      console.error('Erro ao carregar loja:', err.message);
+    } catch (err: unknown) {
+      console.error('Erro ao carregar loja:', err instanceof Error ? err.message : err);
       if (reqId !== reqIdRef.current) return;
       setLojaInfo(null);
     } finally {
@@ -100,12 +118,15 @@ export function AuthProvider({ children, queryClient }: { children: ReactNode; q
     setAuthLoading(false);
 
     if (currentUser) {
-      // CRÍTICO: marcar como loading ANTES de qualquer async,
-      // para evitar uma janela com loading=false + isActive=false.
       setSubLoading(true);
       setLojaLoading(true);
-      loadSubscription(currentUser.id, reqId);
-      loadLojaInfo(currentUser.id, reqId);
+      ensureAccountRows(currentUser)
+        .catch((err: unknown) => console.error('Erro ao garantir cadastro completo:', err instanceof Error ? err.message : err))
+        .finally(() => {
+          if (reqId !== reqIdRef.current) return;
+          loadSubscription(currentUser.id, reqId);
+          loadLojaInfo(currentUser.id, reqId);
+        });
     } else {
       setSubscription(null);
       setLojaInfo(null);
@@ -135,6 +156,8 @@ export function AuthProvider({ children, queryClient }: { children: ReactNode; q
     if (user?.id) {
       setSubLoading(true);
       await loadSubscription(user.id, reqIdRef.current);
+      setLojaLoading(true);
+      await loadLojaInfo(user.id, reqIdRef.current);
     }
   };
 
@@ -153,7 +176,7 @@ export function AuthProvider({ children, queryClient }: { children: ReactNode; q
     return true;
   };
 
-  const signup = async (email: string, password: string, meta: Record<string, any> = {}): Promise<boolean> => {
+  const signup = async (email: string, password: string, meta: Record<string, unknown> = {}): Promise<boolean> => {
     const { data, error } = await supabase.auth.signUp({ email, password, options: { data: meta } });
     if (error) {
       console.error('Erro no signup:', error.message);

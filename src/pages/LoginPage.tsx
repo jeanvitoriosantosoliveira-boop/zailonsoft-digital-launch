@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/services/supabaseClient';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { provisionUserAccount } from '@/lib/accountProvisioning';
 
 type Mode = 'login' | 'signup';
 
@@ -77,23 +78,41 @@ const LoginPage = () => {
     }
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('signup-store', {
-        body: {
-          email,
-          password,
-          store_name: storeName,
-          owner_name: ownerName,
-          phone,
-          whatsapp: whatsapp || phone,
-          business_email: businessEmail || email,
-          descricao,
-          site,
-          localizacao: cidade || estado ? { cidade, estado } : null,
-          redes_sociais: instagram ? { instagram } : null,
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            store_name: storeName,
+            owner_name: ownerName,
+            phone,
+          },
         },
       });
-      if (error) throw new Error(error.message);
-      if (data?.error) throw new Error(data.error);
+      if (error) throw error;
+      let createdUser = data.user;
+      if (!createdUser) throw new Error('Não foi possível criar o usuário.');
+
+      if (!data.session) {
+        const { data: sessionData, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+        if (signInError) throw signInError;
+        createdUser = sessionData.user;
+      }
+
+      await provisionUserAccount({
+        user: createdUser,
+        storeName,
+        ownerName,
+        phone,
+        whatsapp: whatsapp || phone,
+        businessEmail: businessEmail || email,
+        descricao,
+        site,
+        cidade,
+        estado,
+        instagram,
+        updateExistingStore: true,
+      });
 
       toast({
         title: 'Conta criada!',
@@ -106,8 +125,8 @@ const LoginPage = () => {
       } else {
         setMode('login');
       }
-    } catch (err: any) {
-      toast({ title: 'Erro ao criar conta', description: err.message, variant: 'destructive' });
+    } catch (err: unknown) {
+      toast({ title: 'Erro ao criar conta', description: err instanceof Error ? err.message : 'Tente novamente.', variant: 'destructive' });
     } finally {
       setIsLoading(false);
     }

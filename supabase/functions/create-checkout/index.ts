@@ -47,12 +47,13 @@ Deno.serve(async (req) => {
     const stripe = new Stripe(stripeKey, { apiVersion: "2024-06-20" });
 
     // Recupera ou cria customer
-    const { data: sub } = await admin
+    const { data: subs } = await admin
       .from("subscriptions")
-      .select("stripe_customer_id")
+      .select("id, stripe_customer_id")
       .eq("user_id", userId)
-      .maybeSingle();
+      .limit(1);
 
+    const sub = subs?.[0];
     let customerId = sub?.stripe_customer_id || null;
     if (!customerId) {
       const customer = await stripe.customers.create({
@@ -60,10 +61,18 @@ Deno.serve(async (req) => {
         metadata: { user_id: userId },
       });
       customerId = customer.id;
-      await admin.from("subscriptions").upsert(
-        { user_id: userId, stripe_customer_id: customerId, status: "pending_payment" },
-        { onConflict: "user_id" },
-      );
+      if (sub) {
+        await admin
+          .from("subscriptions")
+          .update({ stripe_customer_id: customerId, status: "pending_payment" })
+          .eq("id", sub.id);
+      } else {
+        await admin.from("subscriptions").insert({
+          user_id: userId,
+          stripe_customer_id: customerId,
+          status: "pending_payment",
+        });
+      }
     }
 
     const origin = req.headers.get("origin") || "https://jvs.app";
@@ -78,8 +87,8 @@ Deno.serve(async (req) => {
     });
 
     return json({ url: session.url });
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error("create-checkout error", e);
-    return json({ error: e.message || "Erro interno" }, 500);
+    return json({ error: e instanceof Error ? e.message : "Erro interno" }, 500);
   }
 });
