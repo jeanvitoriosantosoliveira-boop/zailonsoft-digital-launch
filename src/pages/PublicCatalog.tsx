@@ -374,12 +374,12 @@ const PublicCatalog = () => {
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <img src={storeLogo || '/favicon.ico'} alt="Logo" className="w-8 h-8 md:w-10 md:h-10 rounded-xl object-cover" />
-              <span className="text-xs md:text-sm text-muted-foreground">{storeName} © {new Date().getFullYear()}</span>
+              <div>
+                <p className="text-xs md:text-sm text-white font-medium">{storeName}</p>
+                {cityLine && <p className="text-[10px] text-muted-foreground flex items-center gap-1"><MapPin className="w-2.5 h-2.5" /> {cityLine}</p>}
+              </div>
             </div>
-            <div className="flex items-center gap-4 md:gap-6">
-              <a href={`https://wa.me/${storeWhatsapp}`} target="_blank" rel="noopener noreferrer" className="text-xs md:text-sm text-muted-foreground hover:text-cyan-400 transition-colors">WhatsApp</a>
-              <span className="text-xs text-muted-foreground/50">Powered by ZAILON</span>
-            </div>
+            <span className="text-xs text-muted-foreground/60">Powered by Zailon</span>
           </div>
         </div>
       </footer>
