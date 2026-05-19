@@ -26,7 +26,7 @@ interface AuthContextType {
   lojaInfo: LojaInfo | null;
   lojaLoading: boolean;
   login?: (email: string, password: string) => Promise<boolean>;
-  signup?: (email: string, password: string, meta?: Record<string, any>) => Promise<boolean>;
+  signup?: (email: string, password: string, meta?: Record<string, unknown>) => Promise<boolean>;
   isLoggedIn?: boolean;
   isActive?: boolean;
 }
@@ -60,8 +60,8 @@ export function AuthProvider({ children, queryClient }: { children: ReactNode; q
       if (error) throw error;
       if (reqId !== reqIdRef.current) return; // resposta obsoleta
       setSubscription(data as Subscription | null);
-    } catch (err: any) {
-      console.error('Erro ao carregar assinatura:', err.message);
+    } catch (err: unknown) {
+      console.error('Erro ao carregar assinatura:', err instanceof Error ? err.message : err);
       if (reqId !== reqIdRef.current) return;
       setSubscription(null);
     } finally {
@@ -101,8 +101,8 @@ export function AuthProvider({ children, queryClient }: { children: ReactNode; q
       if (error) throw error;
       if (reqId !== reqIdRef.current) return;
       setLojaInfo(data as LojaInfo | null);
-    } catch (err: any) {
-      console.error('Erro ao carregar loja:', err.message);
+    } catch (err: unknown) {
+      console.error('Erro ao carregar loja:', err instanceof Error ? err.message : err);
       if (reqId !== reqIdRef.current) return;
       setLojaInfo(null);
     } finally {
@@ -120,7 +120,7 @@ export function AuthProvider({ children, queryClient }: { children: ReactNode; q
       setSubLoading(true);
       setLojaLoading(true);
       ensureAccountRows(currentUser)
-        .catch((err) => console.error('Erro ao garantir cadastro completo:', err.message))
+        .catch((err: unknown) => console.error('Erro ao garantir cadastro completo:', err instanceof Error ? err.message : err))
         .finally(() => {
           if (reqId !== reqIdRef.current) return;
           loadSubscription(currentUser.id, reqId);
@@ -175,7 +175,7 @@ export function AuthProvider({ children, queryClient }: { children: ReactNode; q
     return true;
   };
 
-  const signup = async (email: string, password: string, meta: Record<string, any> = {}): Promise<boolean> => {
+  const signup = async (email: string, password: string, meta: Record<string, unknown> = {}): Promise<boolean> => {
     const { data, error } = await supabase.auth.signUp({ email, password, options: { data: meta } });
     if (error) {
       console.error('Erro no signup:', error.message);
