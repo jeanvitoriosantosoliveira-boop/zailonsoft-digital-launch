@@ -87,19 +87,6 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen overflow-hidden bg-background">
-      {/* Background particles */}
-      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        {[...Array(20)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-1 h-1 rounded-full bg-cyan-500/20"
-            style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%` }}
-            animate={{ y: [0, -30, 0], opacity: [0.1, 0.4, 0.1] }}
-            transition={{ duration: 4 + Math.random() * 4, repeat: Infinity, delay: Math.random() * 4 }}
-          />
-        ))}
-      </div>
-
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-white/5">
         <div className="container mx-auto px-3 sm:px-4 py-3">
@@ -132,12 +119,19 @@ const HomePage = () => {
       </header>
 
       {/* HERO */}
-      <section ref={heroRef} className="relative min-h-[100svh] flex items-center justify-center pt-24 sm:pt-28 pb-16 overflow-hidden">
-        <motion.div style={{ y: heroImageY, scale: heroScale, opacity: heroOpacity }} className="absolute inset-0 z-0">
-          <img src={zailonHeroCar} alt="Loja de veículos premium" className="w-full h-full object-cover" />
+      <section className="relative min-h-[100svh] flex items-center justify-center pt-24 sm:pt-28 pb-16 overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <img
+            src={zailonHeroCar}
+            alt="Loja de veículos premium"
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+            className="w-full h-full object-cover"
+          />
           <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/75 to-background" />
           <div className="absolute inset-0 bg-gradient-to-r from-background/70 via-transparent to-background/70" />
-        </motion.div>
+        </div>
 
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[90vw] md:w-[900px] h-[300px] md:h-[500px] bg-cyan-500/10 rounded-full blur-[100px] md:blur-[150px] z-0" />
 
