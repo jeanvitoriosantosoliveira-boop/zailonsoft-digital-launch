@@ -26,8 +26,7 @@ async function upsertFromSubscription(s: Stripe.Subscription) {
   if (!userId) {
     // tenta pegar pelo metadata
     const cust = await stripe.customers.retrieve(customerId);
-    // @ts-ignore
-    userId = cust?.metadata?.user_id;
+    userId = !cust.deleted ? cust.metadata?.user_id : undefined;
   }
   if (!userId) {
     console.warn("Sem user_id para customer", customerId);
@@ -71,9 +70,10 @@ Deno.serve(async (req) => {
   let event: Stripe.Event;
   try {
     event = await stripe.webhooks.constructEventAsync(body, signature, webhookSecret);
-  } catch (err: any) {
-    console.error("Webhook signature failure", err.message);
-    return new Response(`Webhook Error: ${err.message}`, { status: 400 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Assinatura inválida";
+    console.error("Webhook signature failure", message);
+    return new Response(`Webhook Error: ${message}`, { status: 400 });
   }
 
   try {
@@ -102,8 +102,9 @@ Deno.serve(async (req) => {
       }
     }
     return new Response(JSON.stringify({ received: true }), { status: 200 });
-  } catch (e: any) {
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : "Erro interno";
     console.error("Handler error", e);
-    return new Response(`Handler error: ${e.message}`, { status: 500 });
+    return new Response(`Handler error: ${message}`, { status: 500 });
   }
 });
