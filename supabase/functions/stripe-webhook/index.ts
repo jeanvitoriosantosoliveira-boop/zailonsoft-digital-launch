@@ -18,7 +18,7 @@ async function upsertFromSubscription(s: Stripe.Subscription) {
   // Encontra user_id pelo customer
   const { data: existing } = await admin
     .from("subscriptions")
-    .select("user_id")
+    .select("id, user_id")
     .eq("stripe_customer_id", customerId)
     .maybeSingle();
 
@@ -37,16 +37,30 @@ async function upsertFromSubscription(s: Stripe.Subscription) {
   const status = s.status; // active, past_due, canceled, unpaid, incomplete, trialing
   const nextBilling = s.current_period_end ? new Date(s.current_period_end * 1000).toISOString() : null;
 
-  await admin.from("subscriptions").upsert(
-    {
-      user_id: userId,
-      stripe_customer_id: customerId,
-      stripe_subscription_id: s.id,
-      status,
-      next_billing_date: nextBilling,
-    },
-    { onConflict: "user_id" },
-  );
+  const payload = {
+    user_id: userId,
+    stripe_customer_id: customerId,
+    stripe_subscription_id: s.id,
+    status,
+    next_billing_date: nextBilling,
+  };
+
+  if (existing?.id) {
+    await admin.from("subscriptions").update(payload).eq("id", existing.id);
+  } else {
+    const { data: byUser } = await admin
+      .from("subscriptions")
+      .select("id")
+      .eq("user_id", userId)
+      .limit(1)
+      .maybeSingle();
+
+    if (byUser?.id) {
+      await admin.from("subscriptions").update(payload).eq("id", byUser.id);
+    } else {
+      await admin.from("subscriptions").insert(payload);
+    }
+  }
 }
 
 Deno.serve(async (req) => {
