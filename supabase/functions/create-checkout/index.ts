@@ -86,8 +86,8 @@ Deno.serve(async (req) => {
     });
 
     return json({ url: session.url });
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error("create-checkout error", e);
-    return json({ error: e.message || "Erro interno" }, 500);
+    return json({ error: e instanceof Error ? e.message : "Erro interno" }, 500);
   }
 });
