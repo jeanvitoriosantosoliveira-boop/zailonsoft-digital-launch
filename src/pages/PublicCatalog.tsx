@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, Search, SlidersHorizontal, X, Instagram, MessageCircle } from 'lucide-react';
+import { Sparkles, Search, SlidersHorizontal, X, Instagram, MessageCircle, MapPin, Clock, Phone, Mail, Globe, Facebook } from 'lucide-react';
 import { useParams, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { formatPrice } from '@/lib/formatters';
@@ -8,13 +8,12 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { VehiclePostCard } from '@/components/ui/VehiclePostCard';
 import { Vehicle } from '@/data/vehicles';
 import { fetchCarsByLojaSlug } from '@/services/api';
+import type { LojaDetails } from '@/services/api';
 
 const PublicCatalog = () => {
   const { lojaSlug } = useParams<{ lojaSlug: string }>();
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [storeName, setStoreName] = useState('');
-  const [storeLogo, setStoreLogo] = useState('');
-  const [storeWhatsapp, setStoreWhatsapp] = useState('');
+  const [loja, setLoja] = useState<LojaDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
