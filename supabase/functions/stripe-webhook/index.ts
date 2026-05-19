@@ -18,7 +18,7 @@ async function upsertFromSubscription(s: Stripe.Subscription) {
   // Encontra user_id pelo customer
   const { data: existing } = await admin
     .from("subscriptions")
-    .select("user_id")
+    .select("id, user_id")
     .eq("stripe_customer_id", customerId)
     .maybeSingle();
 
@@ -26,8 +26,7 @@ async function upsertFromSubscription(s: Stripe.Subscription) {
   if (!userId) {
     // tenta pegar pelo metadata
     const cust = await stripe.customers.retrieve(customerId);
-    // @ts-ignore
-    userId = cust?.metadata?.user_id;
+    userId = !cust.deleted ? cust.metadata?.user_id : undefined;
   }
   if (!userId) {
     console.warn("Sem user_id para customer", customerId);
@@ -37,16 +36,30 @@ async function upsertFromSubscription(s: Stripe.Subscription) {
   const status = s.status; // active, past_due, canceled, unpaid, incomplete, trialing
   const nextBilling = s.current_period_end ? new Date(s.current_period_end * 1000).toISOString() : null;
 
-  await admin.from("subscriptions").upsert(
-    {
-      user_id: userId,
-      stripe_customer_id: customerId,
-      stripe_subscription_id: s.id,
-      status,
-      next_billing_date: nextBilling,
-    },
-    { onConflict: "user_id" },
-  );
+  const payload = {
+    user_id: userId,
+    stripe_customer_id: customerId,
+    stripe_subscription_id: s.id,
+    status,
+    next_billing_date: nextBilling,
+  };
+
+  if (existing?.id) {
+    await admin.from("subscriptions").update(payload).eq("id", existing.id);
+  } else {
+    const { data: byUser } = await admin
+      .from("subscriptions")
+      .select("id")
+      .eq("user_id", userId)
+      .limit(1)
+      .maybeSingle();
+
+    if (byUser?.id) {
+      await admin.from("subscriptions").update(payload).eq("id", byUser.id);
+    } else {
+      await admin.from("subscriptions").insert(payload);
+    }
+  }
 }
 
 Deno.serve(async (req) => {
@@ -57,9 +70,10 @@ Deno.serve(async (req) => {
   let event: Stripe.Event;
   try {
     event = await stripe.webhooks.constructEventAsync(body, signature, webhookSecret);
-  } catch (err: any) {
-    console.error("Webhook signature failure", err.message);
-    return new Response(`Webhook Error: ${err.message}`, { status: 400 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Assinatura inválida";
+    console.error("Webhook signature failure", message);
+    return new Response(`Webhook Error: ${message}`, { status: 400 });
   }
 
   try {
@@ -88,8 +102,9 @@ Deno.serve(async (req) => {
       }
     }
     return new Response(JSON.stringify({ received: true }), { status: 200 });
-  } catch (e: any) {
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : "Erro interno";
     console.error("Handler error", e);
-    return new Response(`Handler error: ${e.message}`, { status: 500 });
+    return new Response(`Handler error: ${message}`, { status: 500 });
   }
 });

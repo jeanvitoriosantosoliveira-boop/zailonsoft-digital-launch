@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/services/supabaseClient';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { provisionUserAccount } from '@/lib/accountProvisioning';
 
 type Mode = 'login' | 'signup';
 
@@ -75,39 +76,97 @@ const LoginPage = () => {
       toast({ title: 'A senha deve ter no mínimo 6 caracteres', variant: 'destructive' });
       return;
     }
+    // Validações adicionais
+    if (email.trim().length === 0 || password.trim().length === 0) {
+      toast({ title: 'Email e senha não podem conter apenas espaços', variant: 'destructive' });
+      return;
+    }
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('signup-store', {
-        body: {
-          email,
-          password,
-          store_name: storeName,
-          owner_name: ownerName,
-          phone,
-          whatsapp: whatsapp || phone,
-          business_email: businessEmail || email,
-          descricao,
-          site,
-          localizacao: cidade || estado ? { cidade, estado } : null,
-          redes_sociais: instagram ? { instagram } : null,
+      console.log('📝 Iniciando signup com email:', email);
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+        options: {
+          data: {
+            store_name: storeName.trim(),
+            owner_name: ownerName.trim() || undefined,
+            phone: phone.trim() || undefined,
+          },
         },
       });
-      if (error) throw new Error(error.message);
-      if (data?.error) throw new Error(data.error);
+      if (error) {
+        console.error('❌ Erro no signup:', error);
+        throw error;
+      }
+      let createdUser = data.user;
+      if (!createdUser) throw new Error('Não foi possível criar o usuário.');
+      
+      console.log('✅ Usuário criado, ID:', createdUser.id);
+
+      let hasSession = !!data.session;
+
+      // Se não houver sessão, tenta fazer login após um pequeno delay
+      if (!data.session) {
+        console.log('⏳ Aguardando propagação (500ms antes de login)...');
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        console.log('🔐 Tentando fazer login com email:', email);
+        const { data: sessionData, error: signInError } = await supabase.auth.signInWithPassword({ 
+          email: email.trim(), 
+          password 
+        });
+        if (signInError) {
+          console.error('❌ Erro ao fazer login:', signInError);
+          throw new Error(`Erro de autenticação: ${signInError.message}`);
+        }
+        if (!sessionData.user) {
+          throw new Error('Não foi possível fazer login após criação da conta');
+        }
+        createdUser = sessionData.user;
+        hasSession = true;
+        console.log('✅ Login bem-sucedido');
+      }
+
+      await provisionUserAccount({
+        user: createdUser,
+        storeName: storeName.trim(),
+        ownerName: ownerName.trim() || undefined,
+        phone: phone.trim() || undefined,
+        whatsapp: (whatsapp || phone).trim() || undefined,
+        businessEmail: (businessEmail || email).trim(),
+        descricao: descricao.trim() || undefined,
+        site: site.trim() || undefined,
+        cidade: cidade.trim() || undefined,
+        estado: estado.trim() || undefined,
+        instagram: instagram.trim() || undefined,
+        updateExistingStore: true,
+      });
 
       toast({
         title: 'Conta criada!',
         description: 'Agora ative sua assinatura para liberar o acesso.',
       });
-      const ok = await login?.(email, password);
-      if (ok) {
+      
+      // Se já estamos autenticados após a criação, esperar pela propagação do listener
+      if (hasSession) {
+        console.log('✅ Usuário já autenticado, aguardando listener...');
         setRedirecting(true);
-        // o useEffect redireciona para /assinar
       } else {
-        setMode('login');
+        // Se não estiver autenticado por algum motivo, tenta via AuthContext
+        console.log('🔄 Tentando autenticação via AuthContext...');
+        const ok = await login?.(email, password);
+        if (ok) {
+          setRedirecting(true);
+        } else {
+          setMode('login');
+          toast({ title: 'Error', description: 'Não foi possível autenticar após criar a conta', variant: 'destructive' });
+        }
       }
-    } catch (err: any) {
-      toast({ title: 'Erro ao criar conta', description: err.message, variant: 'destructive' });
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Tente novamente.';
+      console.error('❌ Erro completo:', err);
+      toast({ title: 'Erro ao criar conta', description: errorMessage, variant: 'destructive' });
     } finally {
       setIsLoading(false);
     }
