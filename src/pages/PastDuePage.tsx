@@ -27,7 +27,7 @@ const PastDuePage = () => {
   };
 
   const waUrl = `https://wa.me/${SUPPORT_PHONE}?text=${encodeURIComponent(
-    `Olá! Minha mensalidade JVS está em atraso (${user?.email || ''}). Preciso de ajuda para regularizar.`,
+    `Olá! Minha mensalidade do Zailon está em atraso (${user?.email || ''}). Preciso de ajuda para regularizar.`,
   )}`;
 
   return (
