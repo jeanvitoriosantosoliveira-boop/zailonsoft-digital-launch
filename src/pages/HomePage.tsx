@@ -228,59 +228,83 @@ const HomePage = () => {
 
       {/* ANTES vs DEPOIS — neuromarketing loss aversion */}
       <section id="beneficios" className="py-20 relative">
-        <div className="container mx-auto px-4">
-          <AnimatedSection className="text-center mb-14 max-w-2xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 mb-4">
-              <Timer className="w-3.5 h-3.5 text-red-400" />
-              <span className="text-xs font-semibold text-red-300">Cada dia sem o Zailon é dinheiro perdido</span>
-            </div>
-            <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-4 leading-tight">
-              A diferença entre <span className="text-red-400">perder</span> e <span className="text-gradient">vender</span>
-            </h2>
-            <p className="text-muted-foreground">
-              Quem opera sem sistema, perde. Quem usa o Zailon, escala.
-            </p>
-          </AnimatedSection>
+  <div className="container mx-auto px-4">
+    <AnimatedSection className="text-center mb-14 max-w-2xl mx-auto">
+      <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 mb-4">
+        <Timer className="w-3.5 h-3.5 text-red-400" />
+        <span className="text-xs font-semibold text-red-300">
+          Cada dia sem o Zailon é dinheiro perdido
+        </span>
+      </div>
 
-          <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-            {/* SEM Zailon */}
-            <AnimatedSection>
-              <div className="glass-card rounded-3xl p-6 sm:p-8 border-red-500/20 relative">
-                <div className="absolute -top-3 left-6 px-3 py-1 rounded-full bg-red-500/20 border border-red-500/30 text-xs font-bold text-red-300 uppercase tracking-wide">Sem Zailon</div>
-                <h3 className="text-xl font-bold text-foreground mt-2 mb-5">O caos de hoje</h3>
-                <ul className="space-y-3">
-                  {painPoints.map((p, i) => (
-                    <li key={i} className="flex items-start gap-3 text-sm">
-                      <div className="w-5 h-5 rounded-full bg-red-500/15 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <X className="w-3 h-3 text-red-400" />
-                      </div>
-                      <span className="text-muted-foreground line-through decoration-red-500/40">{p}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </AnimatedSection>
+      <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-4 leading-tight">
+        A diferença entre{" "}
+        <span className="text-red-400">perder</span> e{" "}
+        <span className="text-gradient">vender</span>
+      </h2>
 
-            {/* COM Zailon */}
-            <AnimatedSection delay={0.15}>
-              <div className="glass-card rounded-3xl p-6 sm:p-8 border-cyan-500/30 relative shadow-[0_0_60px_-15px_rgba(7,171,216,0.4)]">
-                <div className="absolute -top-3 left-6 px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 text-xs font-bold text-white uppercase tracking-wide">Com Zailon</div>
-                <h3 className="text-xl font-bold text-foreground mt-2 mb-5">A máquina de vendas</h3>
-                <ul className="space-y-3">
-                  {gains.map((g, i) => (
-                    <li key={i} className="flex items-start gap-3 text-sm">
-                      <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <Check className="w-3 h-3 text-emerald-400" />
-                      </div>
-                      <span className="text-foreground font-medium">{g}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </AnimatedSection>
+      <p className="text-muted-foreground">
+        Quem opera sem sistema, perde. Quem usa o Zailon, escala.
+      </p>
+    </AnimatedSection>
+
+    <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+      {/* SEM Zailon */}
+      <AnimatedSection>
+        <div className="glass-card overflow-visible rounded-3xl p-6 sm:p-8 border-red-500/20 relative">
+          <div className="absolute left-6 top-0 -translate-y-1/2 px-3 py-1 rounded-full bg-red-500/20 border border-red-500/30 text-xs font-bold text-red-300 uppercase tracking-wide">
+            Sem Zailon
           </div>
+
+          <h3 className="text-xl font-bold text-foreground mt-2 mb-5">
+            O caos de hoje
+          </h3>
+
+          <ul className="space-y-3">
+            {painPoints.map((p, i) => (
+              <li key={i} className="flex items-start gap-3 text-sm">
+                <div className="w-5 h-5 rounded-full bg-red-500/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <X className="w-3 h-3 text-red-400" />
+                </div>
+
+                <span className="text-muted-foreground line-through decoration-red-500/40">
+                  {p}
+                </span>
+              </li>
+            ))}
+          </ul>
         </div>
-      </section>
+      </AnimatedSection>
+
+      {/* COM Zailon */}
+      <AnimatedSection delay={0.15}>
+        <div className="glass-card overflow-visible rounded-3xl p-6 sm:p-8 border-cyan-500/30 relative shadow-[0_0_60px_-15px_rgba(7,171,216,0.4)]">
+          <div className="absolute left-6 top-0 -translate-y-1/2 px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 text-xs font-bold text-white uppercase tracking-wide">
+            Com Zailon
+          </div>
+
+          <h3 className="text-xl font-bold text-foreground mt-2 mb-5">
+            A máquina de vendas
+          </h3>
+
+          <ul className="space-y-3">
+            {gains.map((g, i) => (
+              <li key={i} className="flex items-start gap-3 text-sm">
+                <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <Check className="w-3 h-3 text-emerald-400" />
+                </div>
+
+                <span className="text-foreground font-medium">
+                  {g}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </AnimatedSection>
+    </div>
+  </div>
+</section>
 
       {/* FEATURES */}
       <section id="recursos" className="py-20 relative">
