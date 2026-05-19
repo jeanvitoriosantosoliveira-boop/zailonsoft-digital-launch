@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode, useRe
 import { supabase } from '@/services/supabaseClient';
 import { User } from '@supabase/supabase-js';
 import { QueryClient } from '@tanstack/react-query';
+import { provisionUserAccount } from '@/lib/accountProvisioning';
 
 interface Subscription {
   status: 'active' | 'pending_payment' | 'incomplete' | 'canceled' | 'unpaid' | 'past_due' | 'trialing' | null;
@@ -68,6 +69,22 @@ export function AuthProvider({ children, queryClient }: { children: ReactNode; q
     }
   };
 
+  const ensureAccountRows = async (currentUser: User) => {
+    const results = await Promise.allSettled([
+      supabase.from('profiles').select('id').eq('id', currentUser.id).maybeSingle(),
+      supabase.from('lojas').select('id').eq('user_id', currentUser.id).limit(1),
+      supabase.from('subscriptions').select('id').eq('user_id', currentUser.id).limit(1),
+    ]);
+
+    const missingProfile = results[0].status === 'fulfilled' && !results[0].value.data;
+    const missingStore = results[1].status === 'fulfilled' && !results[1].value.data?.length;
+    const missingSubscription = results[2].status === 'fulfilled' && !results[2].value.data?.length;
+
+    if (missingProfile || missingStore || missingSubscription) {
+      await provisionUserAccount({ user: currentUser });
+    }
+  };
+
   const loadLojaInfo = async (currentUserId: string | undefined, reqId: number) => {
     if (!currentUserId) {
       if (reqId !== reqIdRef.current) return;
@@ -100,12 +117,15 @@ export function AuthProvider({ children, queryClient }: { children: ReactNode; q
     setAuthLoading(false);
 
     if (currentUser) {
-      // CRÍTICO: marcar como loading ANTES de qualquer async,
-      // para evitar uma janela com loading=false + isActive=false.
       setSubLoading(true);
       setLojaLoading(true);
-      loadSubscription(currentUser.id, reqId);
-      loadLojaInfo(currentUser.id, reqId);
+      ensureAccountRows(currentUser)
+        .catch((err) => console.error('Erro ao garantir cadastro completo:', err.message))
+        .finally(() => {
+          if (reqId !== reqIdRef.current) return;
+          loadSubscription(currentUser.id, reqId);
+          loadLojaInfo(currentUser.id, reqId);
+        });
     } else {
       setSubscription(null);
       setLojaInfo(null);
@@ -135,6 +155,8 @@ export function AuthProvider({ children, queryClient }: { children: ReactNode; q
     if (user?.id) {
       setSubLoading(true);
       await loadSubscription(user.id, reqIdRef.current);
+      setLojaLoading(true);
+      await loadLojaInfo(user.id, reqIdRef.current);
     }
   };
 
