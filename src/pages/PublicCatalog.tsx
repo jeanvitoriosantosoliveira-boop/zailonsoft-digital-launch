@@ -95,6 +95,20 @@ const PublicCatalog = () => {
     );
   }
 
+  const storeName = loja?.nome || 'Catálogo';
+  const storeLogo = loja?.logo_url || '';
+  const storeWhatsapp = loja?.whatsapp || '';
+  const storeDescription = loja?.descricao || '';
+  const loc = (loja?.localizacao || {}) as { endereco?: string; cidade?: string; estado?: string; cep?: string };
+  const cityLine = [loc.cidade, loc.estado].filter(Boolean).join(' / ');
+  const fullAddress = [loc.endereco, cityLine].filter(Boolean).join(' • ');
+  const horario = loja?.horario_funcionamento as any;
+  const horarioText = typeof horario === 'string' ? horario : horario?.descricao || horario?.texto || '';
+  const redes = (loja?.redes_sociais || {}) as { instagram?: string; facebook?: string };
+  const instagramHandle = redes.instagram?.replace('@', '').replace(/^https?:\/\/(www\.)?instagram\.com\//, '').replace(/\/$/, '');
+  const facebookUrl = redes.facebook?.startsWith('http') ? redes.facebook : redes.facebook ? `https://facebook.com/${redes.facebook}` : '';
+  const mapsUrl = fullAddress ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}` : '';
+
   return (
     <div className="min-h-screen bg-[#050505]">
       {/* Header */}
@@ -102,25 +116,19 @@ const PublicCatalog = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/5 via-transparent to-transparent" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] md:w-[800px] h-[300px] md:h-[400px] bg-cyan-500/10 rounded-full blur-[120px] opacity-50" />
 
-        <div className="relative container mx-auto px-4 py-6 md:py-12">
-          <div className="flex items-center justify-between mb-6 md:mb-8">
-            <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2 md:gap-3">
-              <img src={storeLogo || '/favicon.ico'} alt="Logo" className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl shadow-glow-md object-cover" />
-              <div>
-                <h1 className="text-lg md:text-xl font-bold text-white">{storeName || 'Catálogo'}</h1>
-                <p className="text-[10px] md:text-xs text-muted-foreground">Catálogo Premium</p>
-              </div>
-            </motion.div>
-
-            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
-              <a href={`https://wa.me/${storeWhatsapp}`} target="_blank" rel="noopener noreferrer">
-                <Button variant="premium" size="sm" className="text-xs md:text-sm h-8 md:h-9">
-                  <MessageCircle className="w-3 h-3 md:w-4 md:h-4" />
-                  WhatsApp
-                </Button>
-              </a>
-            </motion.div>
-          </div>
+        <div className="relative container mx-auto px-4 py-6 md:py-10">
+          {/* Store identity */}
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3 mb-6 md:mb-8">
+            <img src={storeLogo || '/favicon.ico'} alt={storeName} className="w-12 h-12 md:w-14 md:h-14 rounded-2xl shadow-glow-md object-cover border border-white/10" />
+            <div className="min-w-0">
+              <h1 className="text-lg md:text-2xl font-bold text-white truncate">{storeName}</h1>
+              {cityLine && (
+                <p className="text-[11px] md:text-xs text-muted-foreground flex items-center gap-1">
+                  <MapPin className="w-3 h-3" /> {cityLine}
+                </p>
+              )}
+            </div>
+          </motion.div>
 
           {/* Hero Content */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="text-center mb-6 md:mb-8">
@@ -132,10 +140,90 @@ const PublicCatalog = () => {
               Encontre seu próximo
               <span className="text-gradient block mt-1">veículo dos sonhos</span>
             </h2>
-            <p className="text-sm md:text-base text-muted-foreground max-w-lg mx-auto px-4">
-              Navegue pelo nosso catálogo premium de veículos selecionados
-            </p>
+            {storeDescription ? (
+              <p className="text-sm md:text-base text-muted-foreground max-w-2xl mx-auto px-4">{storeDescription}</p>
+            ) : (
+              <p className="text-sm md:text-base text-muted-foreground max-w-lg mx-auto px-4">
+                Navegue pelo nosso catálogo premium de veículos selecionados
+              </p>
+            )}
           </motion.div>
+
+          {/* Store info bar */}
+          {(fullAddress || horarioText || loja?.telefone_principal || loja?.email || loja?.site || instagramHandle || facebookUrl) && (
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
+              className="max-w-3xl mx-auto glass-card rounded-2xl p-4 md:p-5 mb-5 md:mb-6">
+              <div className="grid sm:grid-cols-2 gap-3 md:gap-4 text-sm">
+                {fullAddress && (
+                  <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className="flex items-start gap-3 text-white/85 hover:text-cyan-400 transition-colors group">
+                    <div className="w-9 h-9 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center flex-shrink-0">
+                      <MapPin className="w-4 h-4 text-cyan-400" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium">Endereço</p>
+                      <p className="text-sm leading-tight">{fullAddress}</p>
+                    </div>
+                  </a>
+                )}
+                {horarioText && (
+                  <div className="flex items-start gap-3 text-white/85">
+                    <div className="w-9 h-9 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center flex-shrink-0">
+                      <Clock className="w-4 h-4 text-cyan-400" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium">Horário</p>
+                      <p className="text-sm leading-tight whitespace-pre-line">{horarioText}</p>
+                    </div>
+                  </div>
+                )}
+                {loja?.telefone_principal && (
+                  <a href={`tel:${loja.telefone_principal}`} className="flex items-start gap-3 text-white/85 hover:text-cyan-400 transition-colors">
+                    <div className="w-9 h-9 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center flex-shrink-0">
+                      <Phone className="w-4 h-4 text-cyan-400" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium">Telefone</p>
+                      <p className="text-sm">{loja.telefone_principal}</p>
+                    </div>
+                  </a>
+                )}
+                {loja?.email && (
+                  <a href={`mailto:${loja.email}`} className="flex items-start gap-3 text-white/85 hover:text-cyan-400 transition-colors">
+                    <div className="w-9 h-9 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center flex-shrink-0">
+                      <Mail className="w-4 h-4 text-cyan-400" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium">E-mail</p>
+                      <p className="text-sm truncate">{loja.email}</p>
+                    </div>
+                  </a>
+                )}
+              </div>
+              {(instagramHandle || facebookUrl || loja?.site) && (
+                <div className="flex items-center gap-2 mt-4 pt-4 border-t border-white/5">
+                  <span className="text-[11px] text-muted-foreground mr-1">Siga:</span>
+                  {instagramHandle && (
+                    <a href={`https://instagram.com/${instagramHandle}`} target="_blank" rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-cyan-500/15 border border-white/10 hover:border-cyan-500/30 text-xs text-white/85 transition-all">
+                      <Instagram className="w-3.5 h-3.5" /> @{instagramHandle}
+                    </a>
+                  )}
+                  {facebookUrl && (
+                    <a href={facebookUrl} target="_blank" rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-cyan-500/15 border border-white/10 hover:border-cyan-500/30 text-xs text-white/85 transition-all">
+                      <Facebook className="w-3.5 h-3.5" /> Facebook
+                    </a>
+                  )}
+                  {loja?.site && (
+                    <a href={loja.site.startsWith('http') ? loja.site : `https://${loja.site}`} target="_blank" rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-cyan-500/15 border border-white/10 hover:border-cyan-500/30 text-xs text-white/85 transition-all">
+                      <Globe className="w-3.5 h-3.5" /> Site
+                    </a>
+                  )}
+                </div>
+              )}
+            </motion.div>
+          )}
 
           {/* Search & Filter Bar */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="max-w-3xl mx-auto">
@@ -151,10 +239,18 @@ const PublicCatalog = () => {
                 )}
               </div>
               <button onClick={() => setShowFilters(!showFilters)}
-                className={`h-12 md:h-14 w-12 md:w-14 rounded-xl flex items-center justify-center transition-all flex-shrink-0 ${
-                  showFilters || hasActiveFilters ? 'bg-cyan-500 text-slate-950' : 'bg-white/5 border border-white/10 text-muted-foreground hover:text-white hover:bg-white/10'
+                className={`h-12 md:h-14 px-4 md:px-5 rounded-xl flex items-center gap-2 font-semibold transition-all flex-shrink-0 ${
+                  showFilters || hasActiveFilters
+                    ? 'bg-cyan-500 text-slate-950 shadow-[0_0_20px_-4px_rgba(34,211,238,0.6)]'
+                    : 'bg-gradient-to-br from-cyan-500/20 to-blue-500/10 border border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/25 hover:border-cyan-500/60'
                 }`}>
                 <SlidersHorizontal className="w-5 h-5" />
+                <span className="text-sm">Filtros</span>
+                {hasActiveFilters && !showFilters && (
+                  <span className="ml-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-slate-950 text-cyan-400 text-[10px] font-bold">
+                    {(selectedBrand ? 1 : 0) + (selectedYear ? 1 : 0) + (minPrice > 0 || maxPrice > 0 ? 1 : 0)}
+                  </span>
+                )}
               </button>
             </div>
 
@@ -228,6 +324,7 @@ const PublicCatalog = () => {
           </motion.div>
         </div>
       </header>
+
 
       {/* Feed */}
       <main className="container mx-auto px-4 py-6 md:py-8">
