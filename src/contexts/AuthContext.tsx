@@ -56,10 +56,11 @@ export function AuthProvider({ children, queryClient }: { children: ReactNode; q
         .from('subscriptions')
         .select('status')
         .eq('user_id', currentUserId)
-        .maybeSingle();
+        .limit(10);
       if (error) throw error;
       if (reqId !== reqIdRef.current) return; // resposta obsoleta
-      setSubscription(data as Subscription | null);
+      const rows = (data || []) as Subscription[];
+      setSubscription(rows.find((row) => row.status === 'active') || rows[0] || null);
     } catch (err: unknown) {
       console.error('Erro ao carregar assinatura:', err instanceof Error ? err.message : err);
       if (reqId !== reqIdRef.current) return;
