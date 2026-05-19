@@ -235,14 +235,7 @@ const PublicVehicleDetail = () => {
 
             {/* Desktop CTAs */}
             <div className="hidden md:flex flex-col gap-3 pt-2">
-              {whatsappUrl && (
-                <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
-                  <Button variant="premium" size="lg" className="w-full text-base">
-                    <MessageCircle className="w-5 h-5" /> Tenho interesse — WhatsApp
-                  </Button>
-                </a>
-              )}
-              <Button variant="outline" size="lg" className="w-full" onClick={() => setShowLeadForm(true)}>
+              <Button variant="premium" size="lg" className="w-full text-base" onClick={() => setShowLeadForm(true)}>
                 <Send className="w-4 h-4" /> Enviar proposta
               </Button>
             </div>
@@ -270,12 +263,6 @@ const PublicVehicleDetail = () => {
                       <span className="text-[13px] leading-tight whitespace-pre-line">{horarioText}</span>
                     </div>
                   )}
-                  {loja?.telefone_principal && (
-                    <a href={`tel:${loja.telefone_principal}`} className="flex items-start gap-2 text-white/80 hover:text-cyan-400 transition-colors">
-                      <Phone className="w-4 h-4 text-cyan-400 mt-0.5 flex-shrink-0" />
-                      <span className="text-[13px]">{loja.telefone_principal}</span>
-                    </a>
-                  )}
                 </div>
               </div>
             )}
@@ -286,14 +273,7 @@ const PublicVehicleDetail = () => {
       {/* Mobile sticky CTA */}
       <div className="fixed bottom-0 left-0 right-0 p-3 bg-[#050505]/95 backdrop-blur-xl border-t border-white/10 z-30 md:hidden">
         <div className="flex gap-2 max-w-lg mx-auto">
-          {whatsappUrl && (
-            <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="flex-1">
-              <Button variant="premium" className="w-full h-12">
-                <MessageCircle className="w-4 h-4" /> WhatsApp
-              </Button>
-            </a>
-          )}
-          <Button variant="outline" className="flex-1 h-12" onClick={() => setShowLeadForm(true)}>
+          <Button variant="premium" className="w-full h-12" onClick={() => setShowLeadForm(true)}>
             <Send className="w-4 h-4" /> Proposta
           </Button>
         </div>

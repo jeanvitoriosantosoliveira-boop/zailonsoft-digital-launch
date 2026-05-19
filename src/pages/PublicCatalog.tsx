@@ -176,28 +176,6 @@ const PublicCatalog = () => {
                     </div>
                   </div>
                 )}
-                {loja?.telefone_principal && (
-                  <a href={`tel:${loja.telefone_principal}`} className="flex items-start gap-3 text-white/85 hover:text-cyan-400 transition-colors">
-                    <div className="w-9 h-9 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center flex-shrink-0">
-                      <Phone className="w-4 h-4 text-cyan-400" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium">Telefone</p>
-                      <p className="text-sm">{loja.telefone_principal}</p>
-                    </div>
-                  </a>
-                )}
-                {loja?.email && (
-                  <a href={`mailto:${loja.email}`} className="flex items-start gap-3 text-white/85 hover:text-cyan-400 transition-colors">
-                    <div className="w-9 h-9 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center flex-shrink-0">
-                      <Mail className="w-4 h-4 text-cyan-400" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium">E-mail</p>
-                      <p className="text-sm truncate">{loja.email}</p>
-                    </div>
-                  </a>
-                )}
               </div>
               {(instagramHandle || facebookUrl || loja?.site) && (
                 <div className="flex items-center gap-2 mt-4 pt-4 border-t border-white/5">
