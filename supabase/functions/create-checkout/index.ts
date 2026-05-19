@@ -60,10 +60,18 @@ Deno.serve(async (req) => {
         metadata: { user_id: userId },
       });
       customerId = customer.id;
-      await admin.from("subscriptions").upsert(
-        { user_id: userId, stripe_customer_id: customerId, status: "pending_payment" },
-        { onConflict: "user_id" },
-      );
+      if (sub) {
+        await admin
+          .from("subscriptions")
+          .update({ stripe_customer_id: customerId, status: "pending_payment" })
+          .eq("user_id", userId);
+      } else {
+        await admin.from("subscriptions").insert({
+          user_id: userId,
+          stripe_customer_id: customerId,
+          status: "pending_payment",
+        });
+      }
     }
 
     const origin = req.headers.get("origin") || "https://jvs.app";
