@@ -179,7 +179,7 @@ const LoginPage = () => {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
           <div className="flex items-center justify-between mb-6">
             <Link to="/" className="inline-flex items-center gap-3">
-              <span className="text-xl font-bold text-foreground">JVS<span className="text-gradient"> Soluções</span></span>
+              <span className="text-xl font-bold text-gradient">Zailon</span>
             </Link>
             <ThemeToggle />
           </div>
