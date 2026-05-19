@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/services/supabaseClient';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { provisionUserAccount } from '@/lib/accountProvisioning';
 
 type Mode = 'login' | 'signup';
 
@@ -77,23 +78,34 @@ const LoginPage = () => {
     }
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('signup-store', {
-        body: {
-          email,
-          password,
-          store_name: storeName,
-          owner_name: ownerName,
-          phone,
-          whatsapp: whatsapp || phone,
-          business_email: businessEmail || email,
-          descricao,
-          site,
-          localizacao: cidade || estado ? { cidade, estado } : null,
-          redes_sociais: instagram ? { instagram } : null,
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            store_name: storeName,
+            owner_name: ownerName,
+            phone,
+          },
         },
       });
-      if (error) throw new Error(error.message);
-      if (data?.error) throw new Error(data.error);
+      if (error) throw error;
+      if (!data.user) throw new Error('Não foi possível criar o usuário.');
+
+      await provisionUserAccount({
+        user: data.user,
+        storeName,
+        ownerName,
+        phone,
+        whatsapp: whatsapp || phone,
+        businessEmail: businessEmail || email,
+        descricao,
+        site,
+        cidade,
+        estado,
+        instagram,
+        updateExistingStore: true,
+      });
 
       toast({
         title: 'Conta criada!',
