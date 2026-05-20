@@ -526,6 +526,32 @@ const CRMKanban = () => {
                       </div>
                     )}
 
+                    {(() => {
+                      const seller = getSeller(selectedLead.vendedorId);
+                      if (!seller) return null;
+                      return (
+                        <div className="flex items-center gap-3 p-3 rounded-xl bg-amber-500/5 border border-amber-500/20">
+                          {seller.avatar ? (
+                            <img src={seller.avatar} alt={seller.name} className="w-10 h-10 rounded-xl object-cover" />
+                          ) : (
+                            <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
+                              <span className="text-amber-400 font-bold">{seller.name.charAt(0)}</span>
+                            </div>
+                          )}
+                          <div className="flex-1">
+                            <p className="text-xs text-amber-400">Vendedor responsável</p>
+                            <p className="text-sm font-medium text-white">{seller.name}</p>
+                          </div>
+                          {seller.whatsapp && (
+                            <a href={`https://wa.me/55${seller.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-white/5 hover:bg-white/10">
+                              <MessageCircle className="w-4 h-4 text-emerald-400" />
+                            </a>
+                          )}
+                        </div>
+                      );
+                    })()}
+
+
                     {/* === Bloco condicional por tipo de negociação === */}
                     {selectedLead.dealType === 'financiamento' && selectedLead.financingDetails && (
                       <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20 space-y-2">
