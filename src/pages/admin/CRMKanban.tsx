@@ -364,6 +364,14 @@ const CRMKanban = () => {
                   </select>
                 </div>
                 <div>
+                  <label className="block text-sm text-muted-foreground mb-1">Vendedor responsável</label>
+                  <select value={newVendedorId} onChange={e => setNewVendedorId(e.target.value)}
+                    className="w-full h-12 px-4 rounded-xl bg-[#1a1a2e] border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-500/50" style={{ colorScheme: 'dark' }}>
+                    <option value="">— Sem vendedor —</option>
+                    {sellers.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                  </select>
+                </div>
+                <div>
                   <label className="block text-sm text-muted-foreground mb-1">Chance de Venda</label>
                   <div className="flex gap-2">
                     {(['low', 'medium', 'high'] as const).map(p => (
