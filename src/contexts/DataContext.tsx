@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Vehicle } from '@/data/vehicles';
 import { Lead } from '@/data/leads';
-import { Store, Seller } from '@/data/store';
+import { Store, Seller, Sale } from '@/data/store';
 import { useAuth } from '@/contexts/AuthContext';
 import * as apiService from '@/services/api';
 
@@ -10,6 +10,7 @@ interface DataContextType {
   leads: Lead[];
   store: Store;
   sellers: Seller[];
+  sales: Sale[];
   isLoading: boolean;
   error: string | null;
   refreshData: () => Promise<void>;
@@ -19,10 +20,15 @@ interface DataContextType {
   addLead: (lead: Omit<Lead, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   updateLead: (id: string, updates: Partial<Lead>) => Promise<void>;
   deleteLead: (id: string) => Promise<void>;
+  assignVendedorToLead: (leadId: string, vendedorId: string | null) => Promise<void>;
   updateStore: (updates: Partial<Store>) => Promise<void>;
-  addSeller: (seller: Omit<Seller, 'id' | 'salesCount'>) => Promise<void>;
+  addSeller: (seller: Omit<Seller, 'id' | 'salesCount'>, fotoFile?: File | null) => Promise<void>;
+  updateSeller: (id: string, updates: Partial<Seller>, fotoFile?: File | null) => Promise<void>;
   deleteSeller: (id: string) => Promise<void>;
+  addSale: (sale: Omit<Sale, 'id'>) => Promise<void>;
+  deleteSale: (id: string) => Promise<void>;
 }
+
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
