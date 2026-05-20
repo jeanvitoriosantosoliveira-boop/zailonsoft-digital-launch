@@ -491,6 +491,16 @@ const CRMKanban = () => {
                     </div>
 
                     <div>
+                      <label className="block text-sm font-medium text-muted-foreground mb-2">Vendedor Responsável</label>
+                      <select value={editVendedorId} onChange={(e) => setEditVendedorId(e.target.value)}
+                        className="w-full h-12 px-4 rounded-xl bg-[#1a1a2e] border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-500/50" style={{ colorScheme: 'dark' }}>
+                        <option value="">— Sem vendedor —</option>
+                        {sellers.map(s => <option key={s.id} value={s.id}>{s.name} {s.role ? `• ${s.role}` : ''}</option>)}
+                      </select>
+                    </div>
+
+
+                    <div>
                       <label className="block text-sm font-medium text-muted-foreground mb-2">Observações</label>
                       <Textarea value={editNotes} onChange={(e) => setEditNotes(e.target.value)} placeholder="Adicione observações..." rows={3} className="resize-none" />
                     </div>
