@@ -11,7 +11,8 @@ import {
   LogOut,
   Menu,
   X,
-  ChevronRight
+  ChevronRight,
+  Trophy
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -56,6 +57,7 @@ const MainLayout = () => {
     { icon: LayoutDashboard, label: 'Dashboard', path: `${basePath}/dashboard` },
     { icon: Package, label: 'Catálogo', path: `${basePath}/catalogo` },
     { icon: Users, label: 'Leads / CRM', path: `${basePath}/crm` },
+    { icon: Trophy, label: 'Vendedores', path: `${basePath}/vendedores` },
     { icon: PlusCircle, label: 'Adicionar Veículo', path: `${basePath}/adicionar` },
     { icon: Settings, label: 'Configurações', path: `${basePath}/configuracoes` }
   ];
