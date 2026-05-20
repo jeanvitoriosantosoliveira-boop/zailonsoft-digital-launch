@@ -272,27 +272,26 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             setStore(mapLojaToStore(storeData));
             try {
               const vendedoresData = await apiService.fetchVendedores(storeData.id);
-              setSellers((vendedoresData || []).map((v: any) => ({
-                id: v.id,
-                name: v.nome || '',
-                email: v.email || '',
-                phone: v.telefone || v.whatsapp || '',
-                role: 'Consultor de Vendas',
-                salesCount: 0,
-              })));
+              setSellers((vendedoresData || []).map(mapVendedor));
             } catch {
               setSellers([]);
+            }
+            try {
+              const vendasData = await apiService.fetchVendas(storeData.id);
+              setSales((vendasData || []).map(mapVenda));
+            } catch {
+              setSales([]);
             }
           }
         } catch (err) {
           console.warn('Não foi possível carregar loja:', err);
         }
       } else if (!user) {
-        // Public: no data loaded by default, pages fetch their own
         setVehicles([]);
         setLeads([]);
         setStore(emptyStore);
         setSellers([]);
+        setSales([]);
       }
     } catch (err: any) {
       console.error('Erro ao carregar dados:', err);
