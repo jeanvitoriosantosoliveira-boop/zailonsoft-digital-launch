@@ -25,6 +25,7 @@ import VehicleCatalog from "./pages/admin/VehicleCatalog";
 import CRMKanban from "./pages/admin/CRMKanban";
 import AddVehicle from "./pages/admin/AddVehicle";
 import StoreSettings from "./pages/admin/StoreSettings";
+import Vendedores from "./pages/admin/Vendedores";
 
 const queryClient = new QueryClient();
 
@@ -73,6 +74,7 @@ const App = () => (
                   <Route path="dashboard" element={<Dashboard />} />
                   <Route path="catalogo" element={<VehicleCatalog />} />
                   <Route path="crm" element={<CRMKanban />} />
+                  <Route path="vendedores" element={<Vendedores />} />
                   <Route path="adicionar" element={<AddVehicle />} />
                   <Route path="configuracoes" element={<StoreSettings />} />
                 </Route>

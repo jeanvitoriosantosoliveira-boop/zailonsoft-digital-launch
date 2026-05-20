@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Vehicle } from '@/data/vehicles';
 import { Lead } from '@/data/leads';
-import { Store, Seller } from '@/data/store';
+import { Store, Seller, Sale } from '@/data/store';
 import { useAuth } from '@/contexts/AuthContext';
 import * as apiService from '@/services/api';
 
@@ -10,6 +10,7 @@ interface DataContextType {
   leads: Lead[];
   store: Store;
   sellers: Seller[];
+  sales: Sale[];
   isLoading: boolean;
   error: string | null;
   refreshData: () => Promise<void>;
@@ -19,10 +20,15 @@ interface DataContextType {
   addLead: (lead: Omit<Lead, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   updateLead: (id: string, updates: Partial<Lead>) => Promise<void>;
   deleteLead: (id: string) => Promise<void>;
+  assignVendedorToLead: (leadId: string, vendedorId: string | null) => Promise<void>;
   updateStore: (updates: Partial<Store>) => Promise<void>;
-  addSeller: (seller: Omit<Seller, 'id' | 'salesCount'>) => Promise<void>;
+  addSeller: (seller: Omit<Seller, 'id' | 'salesCount'>, fotoFile?: File | null) => Promise<void>;
+  updateSeller: (id: string, updates: Partial<Seller>, fotoFile?: File | null) => Promise<void>;
   deleteSeller: (id: string) => Promise<void>;
+  addSale: (sale: Omit<Sale, 'id'>) => Promise<void>;
+  deleteSale: (id: string) => Promise<void>;
 }
+
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
@@ -155,6 +161,7 @@ const mapClientToLead = (client: apiService.Client): Lead => {
     outcome: client.outcome || '',
     lastContactAt: client.last_contact_at || undefined,
     followUpCount: client.follow_up_count || 0,
+    vendedorId: (client as any).vendedor_id || null,
     // Blocos condicionais
     financingDetails: financing,
     tradeIn: tradeIn,
@@ -203,8 +210,41 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [leads, setLeads] = useState<Lead[]>([]);
   const [store, setStore] = useState<Store>(emptyStore);
   const [sellers, setSellers] = useState<Seller[]>([]);
+  const [sales, setSales] = useState<Sale[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const mapVendedor = (v: any): Seller => ({
+    id: v.id,
+    name: v.nome || '',
+    email: v.email || '',
+    phone: v.telefone || '',
+    whatsapp: v.whatsapp || '',
+    avatar: v.foto_url || '',
+    role: v.cargo || 'Consultor de Vendas',
+    birthDate: v.data_nascimento || '',
+    hireDate: v.data_admissao || '',
+    commissionPercent: v.comissao_percent != null ? Number(v.comissao_percent) : undefined,
+    monthlyGoal: v.meta_mensal != null ? Number(v.meta_mensal) : undefined,
+    active: v.ativo !== false,
+    notes: v.observacoes || '',
+    workingHours: v.horario_disponivel || '',
+    salesCount: 0,
+  });
+
+  const mapVenda = (v: any): Sale => ({
+    id: v.id,
+    lojaId: v.loja_id,
+    vendedorId: v.vendedor_id || undefined,
+    clientId: v.client_id || undefined,
+    carId: v.car_id || undefined,
+    vehicleName: v.vehicle_name || '',
+    clientName: v.client_name || '',
+    valor: Number(v.valor) || 0,
+    comissao: Number(v.comissao) || 0,
+    dataVenda: v.data_venda || v.created_at,
+    observacoes: v.observacoes || '',
+  });
 
   const refreshData = async () => {
     try {
@@ -232,27 +272,26 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             setStore(mapLojaToStore(storeData));
             try {
               const vendedoresData = await apiService.fetchVendedores(storeData.id);
-              setSellers((vendedoresData || []).map((v: any) => ({
-                id: v.id,
-                name: v.nome || '',
-                email: v.email || '',
-                phone: v.telefone || v.whatsapp || '',
-                role: 'Consultor de Vendas',
-                salesCount: 0,
-              })));
+              setSellers((vendedoresData || []).map(mapVendedor));
             } catch {
               setSellers([]);
+            }
+            try {
+              const vendasData = await apiService.fetchVendas(storeData.id);
+              setSales((vendasData || []).map(mapVenda));
+            } catch {
+              setSales([]);
             }
           }
         } catch (err) {
           console.warn('Não foi possível carregar loja:', err);
         }
       } else if (!user) {
-        // Public: no data loaded by default, pages fetch their own
         setVehicles([]);
         setLeads([]);
         setStore(emptyStore);
         setSellers([]);
+        setSales([]);
       }
     } catch (err: any) {
       console.error('Erro ao carregar dados:', err);
@@ -365,6 +404,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (updates.priority !== undefined) detailUpdates.priority = updates.priority;
       if (updates.dealType !== undefined) detailUpdates.deal_type = updates.dealType;
       if (updates.owner !== undefined) detailUpdates.owner = updates.owner;
+      if (updates.vendedorId !== undefined) detailUpdates.vendedor_id = updates.vendedorId;
 
       if (Object.keys(detailUpdates).length > 0) {
         await apiService.updateClientDetails({ chatId, updatedData: detailUpdates });
@@ -385,6 +425,16 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setLeads(prev => prev.filter(l => l.id !== id));
     } catch (err) {
       console.error('Erro ao deletar lead:', err);
+    }
+  };
+
+  const assignVendedorToLead = async (leadId: string, vendedorId: string | null) => {
+    try {
+      await apiService.assignVendedorToClient(leadId, vendedorId);
+      setLeads(prev => prev.map(l => l.id === leadId ? { ...l, vendedorId } : l));
+    } catch (err) {
+      console.error('Erro ao atribuir vendedor:', err);
+      throw err;
     }
   };
 
@@ -419,19 +469,43 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const addSeller = async (seller: Omit<Seller, 'id' | 'salesCount'>) => {
+  const sellerToPayload = (s: Partial<Seller>): Record<string, any> => {
+    const out: Record<string, any> = {};
+    if (s.name !== undefined) out.nome = s.name;
+    if (s.phone !== undefined) out.telefone = s.phone;
+    if (s.whatsapp !== undefined) out.whatsapp = s.whatsapp;
+    if (s.email !== undefined) out.email = s.email;
+    if (s.role !== undefined) out.cargo = s.role;
+    if (s.birthDate !== undefined) out.data_nascimento = s.birthDate || null;
+    if (s.hireDate !== undefined) out.data_admissao = s.hireDate || null;
+    if (s.commissionPercent !== undefined) out.comissao_percent = s.commissionPercent ?? null;
+    if (s.monthlyGoal !== undefined) out.meta_mensal = s.monthlyGoal ?? null;
+    if (s.active !== undefined) out.ativo = s.active;
+    if (s.notes !== undefined) out.observacoes = s.notes;
+    if (s.workingHours !== undefined) out.horario_disponivel = s.workingHours;
+    return out;
+  };
+
+  const addSeller = async (seller: Omit<Seller, 'id' | 'salesCount'>, fotoFile?: File | null) => {
     try {
       if (!lojaId) throw new Error('Loja não identificada.');
-      const result = await apiService.createVendedor({
-        nome: seller.name,
-        telefone: seller.phone,
-        email: seller.email,
-        whatsapp: seller.phone,
-        loja_id: lojaId
-      });
-      setSellers(prev => [...prev, { ...seller, id: result.id, salesCount: 0 }]);
+      const payload = { ...sellerToPayload(seller), loja_id: lojaId };
+      const result = await apiService.createVendedor(payload, fotoFile);
+      setSellers(prev => [mapVendedor(result), ...prev]);
     } catch (err) {
       console.error('Erro ao adicionar vendedor:', err);
+      throw err;
+    }
+  };
+
+  const updateSeller = async (id: string, updates: Partial<Seller>, fotoFile?: File | null) => {
+    try {
+      const payload = sellerToPayload(updates);
+      const result = await apiService.updateVendedor(id, payload, fotoFile, lojaId || undefined);
+      setSellers(prev => prev.map(s => s.id === id ? mapVendedor(result) : s));
+    } catch (err) {
+      console.error('Erro ao atualizar vendedor:', err);
+      throw err;
     }
   };
 
@@ -444,11 +518,44 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  const addSale = async (sale: Omit<Sale, 'id'>) => {
+    try {
+      if (!lojaId) throw new Error('Loja não identificada.');
+      const result = await apiService.createVenda({
+        loja_id: lojaId,
+        vendedor_id: sale.vendedorId || null,
+        client_id: sale.clientId || null,
+        car_id: sale.carId || null,
+        vehicle_name: sale.vehicleName,
+        client_name: sale.clientName,
+        valor: Number(sale.valor) || 0,
+        comissao: Number(sale.comissao) || 0,
+        data_venda: sale.dataVenda,
+        observacoes: sale.observacoes,
+      });
+      setSales(prev => [mapVenda(result), ...prev]);
+    } catch (err) {
+      console.error('Erro ao registrar venda:', err);
+      throw err;
+    }
+  };
+
+  const deleteSale = async (id: string) => {
+    try {
+      await apiService.deleteVenda(id);
+      setSales(prev => prev.filter(s => s.id !== id));
+    } catch (err) {
+      console.error('Erro ao deletar venda:', err);
+    }
+  };
+
   return (
     <DataContext.Provider value={{
-      vehicles, leads, store, sellers, isLoading, error,
+      vehicles, leads, store, sellers, sales, isLoading, error,
       refreshData, addVehicle, updateVehicle, deleteVehicle,
-      addLead, updateLead, deleteLead, updateStore, addSeller, deleteSeller
+      addLead, updateLead, deleteLead, assignVendedorToLead,
+      updateStore, addSeller, updateSeller, deleteSeller,
+      addSale, deleteSale
     }}>
       {children}
     </DataContext.Provider>

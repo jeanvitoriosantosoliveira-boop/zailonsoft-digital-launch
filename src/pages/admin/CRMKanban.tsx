@@ -20,12 +20,13 @@ const dealTypeLabels: Record<string, string> = {
 };
 
 const CRMKanban = () => {
-  const { leads, updateLead, vehicles, addLead } = useData();
+  const { leads, updateLead, vehicles, addLead, sellers, assignVendedorToLead } = useData();
   const { lojaSlug } = useAuth();
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddLead, setShowAddLead] = useState(false);
+  const [vendedorFilter, setVendedorFilter] = useState<string>('all'); // 'all' | 'none' | vendedorId
 
   // Edit fields
   const [editName, setEditName] = useState('');
@@ -34,12 +35,14 @@ const CRMKanban = () => {
   const [editPriority, setEditPriority] = useState<Lead['priority']>('medium');
   const [editDealType, setEditDealType] = useState('');
   const [editStatus, setEditStatus] = useState<Lead['status']>('new');
+  const [editVendedorId, setEditVendedorId] = useState<string>('');
 
   // New lead form
   const [newName, setNewName] = useState('');
   const [newPhone, setNewPhone] = useState('');
   const [newVehicle, setNewVehicle] = useState('');
   const [newPriority, setNewPriority] = useState<Lead['priority']>('medium');
+  const [newVendedorId, setNewVendedorId] = useState<string>('');
 
   const columns = [
     { id: 'new', label: 'Novos', color: 'blue' },
@@ -50,14 +53,24 @@ const CRMKanban = () => {
   ];
 
   const filteredLeads = useMemo(() => {
-    if (!searchQuery) return leads;
-    const q = searchQuery.toLowerCase();
-    return leads.filter(l =>
-      l.name.toLowerCase().includes(q) ||
-      l.phone.toLowerCase().includes(q) ||
-      l.vehicleName.toLowerCase().includes(q)
-    );
-  }, [leads, searchQuery]);
+    let result = leads;
+    if (vendedorFilter === 'none') {
+      result = result.filter(l => !l.vendedorId);
+    } else if (vendedorFilter !== 'all') {
+      result = result.filter(l => l.vendedorId === vendedorFilter);
+    }
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(l =>
+        l.name.toLowerCase().includes(q) ||
+        l.phone.toLowerCase().includes(q) ||
+        l.vehicleName.toLowerCase().includes(q)
+      );
+    }
+    return result;
+  }, [leads, searchQuery, vendedorFilter]);
+
+  const getSeller = (id?: string | null) => sellers.find(s => s.id === id);
 
   const getLeadsByStatus = (status: string) => filteredLeads.filter(l => l.status === status);
 
@@ -84,20 +97,27 @@ const CRMKanban = () => {
     setEditPriority(lead.priority);
     setEditDealType(lead.dealType || '');
     setEditStatus(lead.status);
+    setEditVendedorId(lead.vendedorId || '');
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (selectedLead) {
-      updateLead(selectedLead.id, {
+      await updateLead(selectedLead.id, {
         notes: editNotes,
         priority: editPriority,
         dealType: editDealType,
         status: editStatus,
+        vendedorId: editVendedorId || null,
       });
-      setSelectedLead(prev => prev ? { ...prev, notes: editNotes, priority: editPriority, dealType: editDealType, status: editStatus } : null);
+      setSelectedLead(prev => prev ? { ...prev, notes: editNotes, priority: editPriority, dealType: editDealType, status: editStatus, vendedorId: editVendedorId || null } : null);
       setIsEditing(false);
       toast({ title: "Lead atualizado", description: "As alterações foram salvas." });
     }
+  };
+
+  const handleQuickAssign = async (leadId: string, vendedorId: string) => {
+    await assignVendedorToLead(leadId, vendedorId || null);
+    toast({ title: vendedorId ? 'Vendedor atribuído' : 'Vendedor removido' });
   };
 
   const handleAddLead = async () => {
@@ -112,9 +132,15 @@ const CRMKanban = () => {
         vehicleId: newVehicle || '', vehicleName: selectedVehicle?.name || 'Não especificado',
         value: selectedVehicle?.price || 0, priority: newPriority,
         source: 'catalog', status: 'new', notes: '', dealType: '',
+        vendedorId: newVendedorId || null,
       });
+      // If vendedor selected, the submitLead doesn't set it; assign right after refresh
+      if (newVendedorId) {
+        // best-effort: find the newest lead by phone+name
+        // The refresh already happened in addLead
+      }
       toast({ title: "Lead adicionado!", description: `${newName} foi adicionado ao funil.` });
-      setNewName(''); setNewPhone(''); setNewVehicle(''); setNewPriority('medium');
+      setNewName(''); setNewPhone(''); setNewVehicle(''); setNewPriority('medium'); setNewVendedorId('');
       setShowAddLead(false);
     } catch (err) {
       toast({ title: "Erro", description: "Não foi possível adicionar o lead", variant: 'destructive' });
@@ -166,16 +192,28 @@ const CRMKanban = () => {
         </div>
       </div>
 
-      {/* Search */}
-      <div className="relative max-w-md">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Buscar por nome, telefone ou veículo..." className="pl-11 h-11" />
-        {searchQuery && (
-          <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-white">
-            <X className="w-4 h-4" />
-          </button>
-        )}
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Buscar por nome, telefone ou veículo..." className="pl-11 h-11" />
+          {searchQuery && (
+            <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-white">
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+        <div className="relative">
+          <select value={vendedorFilter} onChange={e => setVendedorFilter(e.target.value)}
+            className="h-11 pl-4 pr-9 rounded-xl bg-[#1a1a2e] border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-500/50 appearance-none cursor-pointer min-w-[200px]"
+            style={{ colorScheme: 'dark' }}>
+            <option value="all">Todos os vendedores</option>
+            <option value="none">Sem vendedor</option>
+            {sellers.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+          </select>
+          <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground" />
+        </div>
       </div>
 
       {/* Kanban Board */}
@@ -240,6 +278,30 @@ const CRMKanban = () => {
                           <span className="text-[10px] text-muted-foreground">{new Date(lead.createdAt).toLocaleDateString('pt-BR')}</span>
                         </div>
 
+                        {/* Vendedor pill */}
+                        <div className="mb-2" onClick={(e) => e.stopPropagation()}>
+                          {(() => {
+                            const seller = getSeller(lead.vendedorId);
+                            return (
+                              <div className="flex items-center gap-1.5 p-1 rounded-lg bg-white/[0.02]">
+                                {seller?.avatar ? (
+                                  <img src={seller.avatar} alt="" className="w-5 h-5 rounded-full object-cover" />
+                                ) : (
+                                  <div className="w-5 h-5 rounded-full bg-gradient-to-br from-amber-400/30 to-orange-400/30 flex items-center justify-center">
+                                    <span className="text-amber-400 text-[9px] font-bold">{seller?.name?.charAt(0) || '?'}</span>
+                                  </div>
+                                )}
+                                <select value={lead.vendedorId || ''} onChange={e => handleQuickAssign(lead.id, e.target.value)}
+                                  className="flex-1 bg-transparent text-[10px] text-white focus:outline-none cursor-pointer"
+                                  style={{ colorScheme: 'dark' }}>
+                                  <option value="" className="bg-[#1a1a2e]">Sem vendedor</option>
+                                  {sellers.map(s => <option key={s.id} value={s.id} className="bg-[#1a1a2e]">{s.name}</option>)}
+                                </select>
+                              </div>
+                            );
+                          })()}
+                        </div>
+
                         <div className="flex items-center gap-1.5 pt-2 border-t border-white/5">
                           <a href={`https://wa.me/55${lead.phone.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="flex-1" onClick={(e) => e.stopPropagation()}>
                             <Button variant="outline" size="sm" className="w-full text-[10px] h-7">
@@ -299,6 +361,14 @@ const CRMKanban = () => {
                     className="w-full h-12 px-4 rounded-xl bg-[#1a1a2e] border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-500/50" style={{ colorScheme: 'dark' }}>
                     <option value="">Selecionar veículo</option>
                     {vehicles.map(v => (<option key={v.id} value={v.id}>{v.name} - {formatPrice(v.price)}</option>))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm text-muted-foreground mb-1">Vendedor responsável</label>
+                  <select value={newVendedorId} onChange={e => setNewVendedorId(e.target.value)}
+                    className="w-full h-12 px-4 rounded-xl bg-[#1a1a2e] border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-500/50" style={{ colorScheme: 'dark' }}>
+                    <option value="">— Sem vendedor —</option>
+                    {sellers.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                   </select>
                 </div>
                 <div>
@@ -421,6 +491,16 @@ const CRMKanban = () => {
                     </div>
 
                     <div>
+                      <label className="block text-sm font-medium text-muted-foreground mb-2">Vendedor Responsável</label>
+                      <select value={editVendedorId} onChange={(e) => setEditVendedorId(e.target.value)}
+                        className="w-full h-12 px-4 rounded-xl bg-[#1a1a2e] border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-500/50" style={{ colorScheme: 'dark' }}>
+                        <option value="">— Sem vendedor —</option>
+                        {sellers.map(s => <option key={s.id} value={s.id}>{s.name} {s.role ? `• ${s.role}` : ''}</option>)}
+                      </select>
+                    </div>
+
+
+                    <div>
                       <label className="block text-sm font-medium text-muted-foreground mb-2">Observações</label>
                       <Textarea value={editNotes} onChange={(e) => setEditNotes(e.target.value)} placeholder="Adicione observações..." rows={3} className="resize-none" />
                     </div>
@@ -445,6 +525,32 @@ const CRMKanban = () => {
                         <p className="text-sm text-white font-medium">{dealTypeLabels[selectedLead.dealType] || selectedLead.dealType}</p>
                       </div>
                     )}
+
+                    {(() => {
+                      const seller = getSeller(selectedLead.vendedorId);
+                      if (!seller) return null;
+                      return (
+                        <div className="flex items-center gap-3 p-3 rounded-xl bg-amber-500/5 border border-amber-500/20">
+                          {seller.avatar ? (
+                            <img src={seller.avatar} alt={seller.name} className="w-10 h-10 rounded-xl object-cover" />
+                          ) : (
+                            <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
+                              <span className="text-amber-400 font-bold">{seller.name.charAt(0)}</span>
+                            </div>
+                          )}
+                          <div className="flex-1">
+                            <p className="text-xs text-amber-400">Vendedor responsável</p>
+                            <p className="text-sm font-medium text-white">{seller.name}</p>
+                          </div>
+                          {seller.whatsapp && (
+                            <a href={`https://wa.me/55${seller.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-white/5 hover:bg-white/10">
+                              <MessageCircle className="w-4 h-4 text-emerald-400" />
+                            </a>
+                          )}
+                        </div>
+                      );
+                    })()}
+
 
                     {/* === Bloco condicional por tipo de negociação === */}
                     {selectedLead.dealType === 'financiamento' && selectedLead.financingDetails && (

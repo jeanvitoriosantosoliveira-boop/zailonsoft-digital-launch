@@ -22,6 +22,9 @@ export interface Lead {
   outcome?: string;
   lastContactAt?: string;
   followUpCount?: number;
+  vendedorId?: string | null;
+  vendedorName?: string | null;
+  vendedorAvatar?: string | null;
   // Blocos condicionais por tipo de negociação
   financingDetails?: {
     down_payment?: number;

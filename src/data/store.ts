@@ -39,34 +39,34 @@ export interface Seller {
   name: string;
   email: string;
   phone: string;
+  whatsapp?: string;
   avatar?: string;
   role: string;
+  birthDate?: string;
+  hireDate?: string;
+  commissionPercent?: number;
+  monthlyGoal?: number;
+  active?: boolean;
+  notes?: string;
+  workingHours?: string;
   salesCount: number;
+  salesThisMonth?: number;
+  revenueThisMonth?: number;
+  revenueTotal?: number;
 }
 
-export const sellers: Seller[] = [
-  {
-    id: "seller-1",
-    name: "João Pedro Santos",
-    email: "joao.santos@zailon.com.br",
-    phone: "(11) 98765-4321",
-    role: "Consultor Sênior",
-    salesCount: 45
-  },
-  {
-    id: "seller-2",
-    name: "Maria Fernanda Lima",
-    email: "maria.lima@zailon.com.br",
-    phone: "(11) 98654-3210",
-    role: "Consultora de Vendas",
-    salesCount: 32
-  },
-  {
-    id: "seller-3",
-    name: "Pedro Henrique Costa",
-    email: "pedro.costa@zailon.com.br",
-    phone: "(11) 97543-2109",
-    role: "Consultor de Vendas",
-    salesCount: 28
-  }
-];
+export interface Sale {
+  id: string;
+  lojaId: string;
+  vendedorId?: string;
+  clientId?: string;
+  carId?: string;
+  vehicleName?: string;
+  clientName?: string;
+  valor: number;
+  comissao?: number;
+  dataVenda: string;
+  observacoes?: string;
+}
+
+export const sellers: Seller[] = [];

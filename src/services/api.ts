@@ -841,7 +841,8 @@ export const fetchVendedores = async (lojaId: string) => {
   const { data, error } = await supabase
     .from('vendedores')
     .select('*')
-    .eq('loja_id', lojaId);
+    .eq('loja_id', lojaId)
+    .order('created_at', { ascending: false });
   if (error) {
     console.error('Erro ao buscar vendedores:', error);
     throw new Error('Falha ao buscar vendedores.');
@@ -849,13 +850,46 @@ export const fetchVendedores = async (lojaId: string) => {
   return data;
 };
 
-export const createVendedor = async (vendedorData: any) => {
+export const uploadVendedorFoto = async (file: File, lojaId: string, vendedorId: string): Promise<string> => {
+  const ext = file.name.includes('.') ? file.name.split('.').pop() : 'jpg';
+  const path = `${lojaId}/${vendedorId}-${uuidv4()}.${ext}`;
+  const { error } = await supabase.storage.from('vendedor-fotos').upload(path, file, { upsert: true });
+  if (error) {
+    console.error('Falha ao subir foto do vendedor:', error);
+    throw new Error('Falha ao subir foto do vendedor.');
+  }
+  const { data } = supabase.storage.from('vendedor-fotos').getPublicUrl(path);
+  return data.publicUrl;
+};
+
+export const createVendedor = async (vendedorData: any, fotoFile?: File | null) => {
+  const id = vendedorData.id || uuidv4();
+  let foto_url: string | null = null;
+  if (fotoFile && vendedorData.loja_id) {
+    foto_url = await uploadVendedorFoto(fotoFile, vendedorData.loja_id, id);
+  }
+  const payload = { ...vendedorData, id, ...(foto_url ? { foto_url } : {}) };
   const { data, error } = await supabase
     .from('vendedores')
-    .insert(vendedorData)
+    .insert(payload)
     .select()
     .single();
   if (error) throw new Error(`Falha ao adicionar vendedor: ${error.message}`);
+  return data;
+};
+
+export const updateVendedor = async (vendedorId: string, updates: any, fotoFile?: File | null, lojaId?: string) => {
+  const final: any = { ...updates };
+  if (fotoFile) {
+    final.foto_url = await uploadVendedorFoto(fotoFile, lojaId || updates.loja_id, vendedorId);
+  }
+  const { data, error } = await supabase
+    .from('vendedores')
+    .update(final)
+    .eq('id', vendedorId)
+    .select()
+    .single();
+  if (error) throw new Error(`Falha ao atualizar vendedor: ${error.message}`);
   return data;
 };
 
@@ -867,3 +901,63 @@ export const deleteVendedor = async (vendedorId: string) => {
   if (error) throw new Error('Falha ao deletar vendedor.');
   return vendedorId;
 };
+
+export const assignVendedorToClient = async (clientId: string, vendedorId: string | null) => {
+  const { data, error } = await supabase
+    .from('clients')
+    .update({ vendedor_id: vendedorId })
+    .eq('id', clientId)
+    .select()
+    .single();
+  if (error) throw new Error('Falha ao atribuir vendedor ao lead.');
+  return data;
+};
+
+// ======================= VENDAS =======================
+
+export const fetchVendas = async (lojaId: string) => {
+  if (!lojaId) return [];
+  const { data, error } = await supabase
+    .from('vendas')
+    .select('*')
+    .eq('loja_id', lojaId)
+    .order('data_venda', { ascending: false });
+  if (error) {
+    console.error('Erro ao buscar vendas:', error);
+    throw new Error('Falha ao buscar vendas.');
+  }
+  return data;
+};
+
+export const createVenda = async (venda: {
+  loja_id: string;
+  vendedor_id?: string | null;
+  client_id?: string | null;
+  car_id?: string | null;
+  vehicle_name?: string;
+  client_name?: string;
+  valor: number;
+  comissao?: number;
+  data_venda?: string;
+  observacoes?: string;
+}) => {
+  const payload = {
+    id: uuidv4(),
+    ...venda,
+    data_venda: venda.data_venda || new Date().toISOString(),
+  };
+  const { data, error } = await supabase
+    .from('vendas')
+    .insert(payload)
+    .select()
+    .single();
+  if (error) throw new Error(`Falha ao registrar venda: ${error.message}`);
+  return data;
+};
+
+export const deleteVenda = async (vendaId: string) => {
+  const { error } = await supabase.from('vendas').delete().eq('id', vendaId);
+  if (error) throw new Error('Falha ao deletar venda.');
+  return vendaId;
+};
+
