@@ -161,6 +161,7 @@ const mapClientToLead = (client: apiService.Client): Lead => {
     outcome: client.outcome || '',
     lastContactAt: client.last_contact_at || undefined,
     followUpCount: client.follow_up_count || 0,
+    vendedorId: (client as any).vendedor_id || null,
     // Blocos condicionais
     financingDetails: financing,
     tradeIn: tradeIn,
@@ -209,8 +210,41 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [leads, setLeads] = useState<Lead[]>([]);
   const [store, setStore] = useState<Store>(emptyStore);
   const [sellers, setSellers] = useState<Seller[]>([]);
+  const [sales, setSales] = useState<Sale[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const mapVendedor = (v: any): Seller => ({
+    id: v.id,
+    name: v.nome || '',
+    email: v.email || '',
+    phone: v.telefone || '',
+    whatsapp: v.whatsapp || '',
+    avatar: v.foto_url || '',
+    role: v.cargo || 'Consultor de Vendas',
+    birthDate: v.data_nascimento || '',
+    hireDate: v.data_admissao || '',
+    commissionPercent: v.comissao_percent != null ? Number(v.comissao_percent) : undefined,
+    monthlyGoal: v.meta_mensal != null ? Number(v.meta_mensal) : undefined,
+    active: v.ativo !== false,
+    notes: v.observacoes || '',
+    workingHours: v.horario_disponivel || '',
+    salesCount: 0,
+  });
+
+  const mapVenda = (v: any): Sale => ({
+    id: v.id,
+    lojaId: v.loja_id,
+    vendedorId: v.vendedor_id || undefined,
+    clientId: v.client_id || undefined,
+    carId: v.car_id || undefined,
+    vehicleName: v.vehicle_name || '',
+    clientName: v.client_name || '',
+    valor: Number(v.valor) || 0,
+    comissao: Number(v.comissao) || 0,
+    dataVenda: v.data_venda || v.created_at,
+    observacoes: v.observacoes || '',
+  });
 
   const refreshData = async () => {
     try {
