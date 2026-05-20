@@ -192,16 +192,28 @@ const CRMKanban = () => {
         </div>
       </div>
 
-      {/* Search */}
-      <div className="relative max-w-md">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Buscar por nome, telefone ou veículo..." className="pl-11 h-11" />
-        {searchQuery && (
-          <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-white">
-            <X className="w-4 h-4" />
-          </button>
-        )}
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Buscar por nome, telefone ou veículo..." className="pl-11 h-11" />
+          {searchQuery && (
+            <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-white">
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+        <div className="relative">
+          <select value={vendedorFilter} onChange={e => setVendedorFilter(e.target.value)}
+            className="h-11 pl-4 pr-9 rounded-xl bg-[#1a1a2e] border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-500/50 appearance-none cursor-pointer min-w-[200px]"
+            style={{ colorScheme: 'dark' }}>
+            <option value="all">Todos os vendedores</option>
+            <option value="none">Sem vendedor</option>
+            {sellers.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+          </select>
+          <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground" />
+        </div>
       </div>
 
       {/* Kanban Board */}
