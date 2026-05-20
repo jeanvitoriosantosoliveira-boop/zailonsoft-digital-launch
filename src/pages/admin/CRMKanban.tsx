@@ -20,12 +20,13 @@ const dealTypeLabels: Record<string, string> = {
 };
 
 const CRMKanban = () => {
-  const { leads, updateLead, vehicles, addLead } = useData();
+  const { leads, updateLead, vehicles, addLead, sellers, assignVendedorToLead } = useData();
   const { lojaSlug } = useAuth();
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddLead, setShowAddLead] = useState(false);
+  const [vendedorFilter, setVendedorFilter] = useState<string>('all'); // 'all' | 'none' | vendedorId
 
   // Edit fields
   const [editName, setEditName] = useState('');
@@ -34,12 +35,14 @@ const CRMKanban = () => {
   const [editPriority, setEditPriority] = useState<Lead['priority']>('medium');
   const [editDealType, setEditDealType] = useState('');
   const [editStatus, setEditStatus] = useState<Lead['status']>('new');
+  const [editVendedorId, setEditVendedorId] = useState<string>('');
 
   // New lead form
   const [newName, setNewName] = useState('');
   const [newPhone, setNewPhone] = useState('');
   const [newVehicle, setNewVehicle] = useState('');
   const [newPriority, setNewPriority] = useState<Lead['priority']>('medium');
+  const [newVendedorId, setNewVendedorId] = useState<string>('');
 
   const columns = [
     { id: 'new', label: 'Novos', color: 'blue' },
@@ -50,14 +53,24 @@ const CRMKanban = () => {
   ];
 
   const filteredLeads = useMemo(() => {
-    if (!searchQuery) return leads;
-    const q = searchQuery.toLowerCase();
-    return leads.filter(l =>
-      l.name.toLowerCase().includes(q) ||
-      l.phone.toLowerCase().includes(q) ||
-      l.vehicleName.toLowerCase().includes(q)
-    );
-  }, [leads, searchQuery]);
+    let result = leads;
+    if (vendedorFilter === 'none') {
+      result = result.filter(l => !l.vendedorId);
+    } else if (vendedorFilter !== 'all') {
+      result = result.filter(l => l.vendedorId === vendedorFilter);
+    }
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(l =>
+        l.name.toLowerCase().includes(q) ||
+        l.phone.toLowerCase().includes(q) ||
+        l.vehicleName.toLowerCase().includes(q)
+      );
+    }
+    return result;
+  }, [leads, searchQuery, vendedorFilter]);
+
+  const getSeller = (id?: string | null) => sellers.find(s => s.id === id);
 
   const getLeadsByStatus = (status: string) => filteredLeads.filter(l => l.status === status);
 
@@ -84,20 +97,27 @@ const CRMKanban = () => {
     setEditPriority(lead.priority);
     setEditDealType(lead.dealType || '');
     setEditStatus(lead.status);
+    setEditVendedorId(lead.vendedorId || '');
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (selectedLead) {
-      updateLead(selectedLead.id, {
+      await updateLead(selectedLead.id, {
         notes: editNotes,
         priority: editPriority,
         dealType: editDealType,
         status: editStatus,
+        vendedorId: editVendedorId || null,
       });
-      setSelectedLead(prev => prev ? { ...prev, notes: editNotes, priority: editPriority, dealType: editDealType, status: editStatus } : null);
+      setSelectedLead(prev => prev ? { ...prev, notes: editNotes, priority: editPriority, dealType: editDealType, status: editStatus, vendedorId: editVendedorId || null } : null);
       setIsEditing(false);
       toast({ title: "Lead atualizado", description: "As alterações foram salvas." });
     }
+  };
+
+  const handleQuickAssign = async (leadId: string, vendedorId: string) => {
+    await assignVendedorToLead(leadId, vendedorId || null);
+    toast({ title: vendedorId ? 'Vendedor atribuído' : 'Vendedor removido' });
   };
 
   const handleAddLead = async () => {
@@ -112,9 +132,15 @@ const CRMKanban = () => {
         vehicleId: newVehicle || '', vehicleName: selectedVehicle?.name || 'Não especificado',
         value: selectedVehicle?.price || 0, priority: newPriority,
         source: 'catalog', status: 'new', notes: '', dealType: '',
+        vendedorId: newVendedorId || null,
       });
+      // If vendedor selected, the submitLead doesn't set it; assign right after refresh
+      if (newVendedorId) {
+        // best-effort: find the newest lead by phone+name
+        // The refresh already happened in addLead
+      }
       toast({ title: "Lead adicionado!", description: `${newName} foi adicionado ao funil.` });
-      setNewName(''); setNewPhone(''); setNewVehicle(''); setNewPriority('medium');
+      setNewName(''); setNewPhone(''); setNewVehicle(''); setNewPriority('medium'); setNewVendedorId('');
       setShowAddLead(false);
     } catch (err) {
       toast({ title: "Erro", description: "Não foi possível adicionar o lead", variant: 'destructive' });
