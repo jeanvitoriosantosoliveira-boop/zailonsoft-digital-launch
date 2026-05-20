@@ -404,6 +404,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (updates.priority !== undefined) detailUpdates.priority = updates.priority;
       if (updates.dealType !== undefined) detailUpdates.deal_type = updates.dealType;
       if (updates.owner !== undefined) detailUpdates.owner = updates.owner;
+      if (updates.vendedorId !== undefined) detailUpdates.vendedor_id = updates.vendedorId;
 
       if (Object.keys(detailUpdates).length > 0) {
         await apiService.updateClientDetails({ chatId, updatedData: detailUpdates });
@@ -424,6 +425,16 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setLeads(prev => prev.filter(l => l.id !== id));
     } catch (err) {
       console.error('Erro ao deletar lead:', err);
+    }
+  };
+
+  const assignVendedorToLead = async (leadId: string, vendedorId: string | null) => {
+    try {
+      await apiService.assignVendedorToClient(leadId, vendedorId);
+      setLeads(prev => prev.map(l => l.id === leadId ? { ...l, vendedorId } : l));
+    } catch (err) {
+      console.error('Erro ao atribuir vendedor:', err);
+      throw err;
     }
   };
 
@@ -458,19 +469,43 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const addSeller = async (seller: Omit<Seller, 'id' | 'salesCount'>) => {
+  const sellerToPayload = (s: Partial<Seller>): Record<string, any> => {
+    const out: Record<string, any> = {};
+    if (s.name !== undefined) out.nome = s.name;
+    if (s.phone !== undefined) out.telefone = s.phone;
+    if (s.whatsapp !== undefined) out.whatsapp = s.whatsapp;
+    if (s.email !== undefined) out.email = s.email;
+    if (s.role !== undefined) out.cargo = s.role;
+    if (s.birthDate !== undefined) out.data_nascimento = s.birthDate || null;
+    if (s.hireDate !== undefined) out.data_admissao = s.hireDate || null;
+    if (s.commissionPercent !== undefined) out.comissao_percent = s.commissionPercent ?? null;
+    if (s.monthlyGoal !== undefined) out.meta_mensal = s.monthlyGoal ?? null;
+    if (s.active !== undefined) out.ativo = s.active;
+    if (s.notes !== undefined) out.observacoes = s.notes;
+    if (s.workingHours !== undefined) out.horario_disponivel = s.workingHours;
+    return out;
+  };
+
+  const addSeller = async (seller: Omit<Seller, 'id' | 'salesCount'>, fotoFile?: File | null) => {
     try {
       if (!lojaId) throw new Error('Loja não identificada.');
-      const result = await apiService.createVendedor({
-        nome: seller.name,
-        telefone: seller.phone,
-        email: seller.email,
-        whatsapp: seller.phone,
-        loja_id: lojaId
-      });
-      setSellers(prev => [...prev, { ...seller, id: result.id, salesCount: 0 }]);
+      const payload = { ...sellerToPayload(seller), loja_id: lojaId };
+      const result = await apiService.createVendedor(payload, fotoFile);
+      setSellers(prev => [mapVendedor(result), ...prev]);
     } catch (err) {
       console.error('Erro ao adicionar vendedor:', err);
+      throw err;
+    }
+  };
+
+  const updateSeller = async (id: string, updates: Partial<Seller>, fotoFile?: File | null) => {
+    try {
+      const payload = sellerToPayload(updates);
+      const result = await apiService.updateVendedor(id, payload, fotoFile, lojaId || undefined);
+      setSellers(prev => prev.map(s => s.id === id ? mapVendedor(result) : s));
+    } catch (err) {
+      console.error('Erro ao atualizar vendedor:', err);
+      throw err;
     }
   };
 
@@ -483,11 +518,44 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  const addSale = async (sale: Omit<Sale, 'id'>) => {
+    try {
+      if (!lojaId) throw new Error('Loja não identificada.');
+      const result = await apiService.createVenda({
+        loja_id: lojaId,
+        vendedor_id: sale.vendedorId || null,
+        client_id: sale.clientId || null,
+        car_id: sale.carId || null,
+        vehicle_name: sale.vehicleName,
+        client_name: sale.clientName,
+        valor: Number(sale.valor) || 0,
+        comissao: Number(sale.comissao) || 0,
+        data_venda: sale.dataVenda,
+        observacoes: sale.observacoes,
+      });
+      setSales(prev => [mapVenda(result), ...prev]);
+    } catch (err) {
+      console.error('Erro ao registrar venda:', err);
+      throw err;
+    }
+  };
+
+  const deleteSale = async (id: string) => {
+    try {
+      await apiService.deleteVenda(id);
+      setSales(prev => prev.filter(s => s.id !== id));
+    } catch (err) {
+      console.error('Erro ao deletar venda:', err);
+    }
+  };
+
   return (
     <DataContext.Provider value={{
-      vehicles, leads, store, sellers, isLoading, error,
+      vehicles, leads, store, sellers, sales, isLoading, error,
       refreshData, addVehicle, updateVehicle, deleteVehicle,
-      addLead, updateLead, deleteLead, updateStore, addSeller, deleteSeller
+      addLead, updateLead, deleteLead, assignVendedorToLead,
+      updateStore, addSeller, updateSeller, deleteSeller,
+      addSale, deleteSale
     }}>
       {children}
     </DataContext.Provider>
