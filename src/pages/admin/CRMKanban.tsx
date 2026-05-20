@@ -278,6 +278,30 @@ const CRMKanban = () => {
                           <span className="text-[10px] text-muted-foreground">{new Date(lead.createdAt).toLocaleDateString('pt-BR')}</span>
                         </div>
 
+                        {/* Vendedor pill */}
+                        <div className="mb-2" onClick={(e) => e.stopPropagation()}>
+                          {(() => {
+                            const seller = getSeller(lead.vendedorId);
+                            return (
+                              <div className="flex items-center gap-1.5 p-1 rounded-lg bg-white/[0.02]">
+                                {seller?.avatar ? (
+                                  <img src={seller.avatar} alt="" className="w-5 h-5 rounded-full object-cover" />
+                                ) : (
+                                  <div className="w-5 h-5 rounded-full bg-gradient-to-br from-amber-400/30 to-orange-400/30 flex items-center justify-center">
+                                    <span className="text-amber-400 text-[9px] font-bold">{seller?.name?.charAt(0) || '?'}</span>
+                                  </div>
+                                )}
+                                <select value={lead.vendedorId || ''} onChange={e => handleQuickAssign(lead.id, e.target.value)}
+                                  className="flex-1 bg-transparent text-[10px] text-white focus:outline-none cursor-pointer"
+                                  style={{ colorScheme: 'dark' }}>
+                                  <option value="" className="bg-[#1a1a2e]">Sem vendedor</option>
+                                  {sellers.map(s => <option key={s.id} value={s.id} className="bg-[#1a1a2e]">{s.name}</option>)}
+                                </select>
+                              </div>
+                            );
+                          })()}
+                        </div>
+
                         <div className="flex items-center gap-1.5 pt-2 border-t border-white/5">
                           <a href={`https://wa.me/55${lead.phone.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="flex-1" onClick={(e) => e.stopPropagation()}>
                             <Button variant="outline" size="sm" className="w-full text-[10px] h-7">
